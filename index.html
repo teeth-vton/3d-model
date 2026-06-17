@@ -206,7 +206,7 @@
             const pollInterval = setInterval(async () => {
                 try {
                     // Check v3 Task Status
-                    const response = await fetch(`https://openapi.tripo3d.ai/v3/task/${taskId}`, {
+                const response = await fetch(`/api/task/${taskId}`, {
                         method: "GET",
                         headers: { "Authorization": `Bearer ${API_KEY}` }
                     });
