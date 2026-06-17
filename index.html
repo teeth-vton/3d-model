@@ -21,7 +21,7 @@
         video { width: 100%; display: block; transform: scaleX(-1); }
         
         .face-guide {
-            position: absolute; top: 15%; left: 25%; right: 25%; bottom: 15%;
+            position: absolute; top: 10%; left: 25%; right: 25%; bottom: 10%;
             border: 2px dashed rgba(88, 166, 255, 0.6); border-radius: 50%; pointer-events: none;
             box-shadow: 0 0 15px rgba(88, 166, 255, 0.3) inset;
         }
@@ -76,9 +76,10 @@
 
     <script>
         // ==========================================
-        // PASTE YOUR ACTUAL TRIPO API KEY HERE
+        // YOUR API KEY AND CORS PROXY 
         // ==========================================
         const API_KEY = "tsk_0OLvfGldGNycdTJn4YS6wmjg0MD_bLTKwsGFppTK68R"; 
+        const CORS_PROXY = "https://corsproxy.io/?";
         
         const video = document.getElementById('webcam');
         const canvas = document.getElementById('canvas');
@@ -95,6 +96,7 @@
         const steps = ["front", "left", "right"];
         const capturedImagesBase64 = {}; 
 
+        // Start Webcam
         navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
             .then(stream => { video.srcObject = stream; })
             .catch(err => { alert("Please allow camera access."); });
@@ -103,20 +105,31 @@
             flash.style.opacity = 1;
             setTimeout(() => { flash.style.opacity = 0; }, 150);
 
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            // COMPRESSION FIX: Resize image to perfect 512x512 square to prevent 504 Timeout
+            canvas.width = 512;
+            canvas.height = 512;
             
+            // Calculate crop to keep face centered
+            const size = Math.min(video.videoWidth, video.videoHeight);
+            const startX = (video.videoWidth - size) / 2;
+            const startY = (video.videoHeight - size) / 2;
+            
+            // Draw cropped & compressed image
+            context.drawImage(video, startX, startY, size, size, 0, 0, 512, 512);
+            
+            // Convert to highly optimized JPEG
             const imageData = canvas.toDataURL('image/jpeg', 0.8);
             const viewName = steps[currentStep];
             capturedImagesBase64[viewName] = imageData;
 
+            // Show thumbnail
             const img = document.createElement('img');
             img.src = imageData;
             gallery.appendChild(img);
 
             currentStep++;
 
+            // Handle UI Flow
             if (currentStep === 1) {
                 instructionText.innerText = "Step 2: Turn your head slightly LEFT.";
                 captureBtn.innerText = "Capture Left Profile";
@@ -129,7 +142,6 @@
                 cameraView.style.display = "none";
                 video.srcObject.getTracks().forEach(track => track.stop()); 
                 
-                // Trigger the live API!
                 processToTripoAPI();
             }
         }
@@ -143,16 +155,16 @@
             try {
                 statusText.innerText = "Step 1/3: Securing and uploading image data...";
                 
-                // 1. Upload the 3 images to Tripo to get file_tokens
-            const uploadEndpoint = "/api/upload";
+                const uploadUrl = CORS_PROXY + "https://api.tripo3d.ai/v2/openapi/upload"; 
                 const tokens = {};
                 
+                // 1. Upload Images
                 for (const view of steps) {
                     const blob = await base64ToBlob(capturedImagesBase64[view]);
                     const formData = new FormData();
                     formData.append("file", blob, `${view}.jpg`);
 
-                    const uploadRes = await fetch(uploadEndpoint, {
+                    const uploadRes = await fetch(uploadUrl, {
                         method: "POST",
                         headers: { "Authorization": `Bearer ${API_KEY}` },
                         body: formData
@@ -161,13 +173,14 @@
                     if(!uploadRes.ok) throw new Error(`Upload failed for ${view} view.`);
                     const uploadData = await uploadRes.json();
                     
-                    // Save the token
+                    // Save Tripo's internal image token
                     tokens[view] = uploadData.data.image_token || uploadData.data.file_token; 
                 }
 
                 statusText.innerText = "Step 2/3: AI generating 3D Mesh (This takes 1-3 mins)...";
 
-                // 2. Send the Multiview Task to the v3 Endpoint
+                // 2. Generate 3D Model
+                const generateUrl = CORS_PROXY + "https://openapi.tripo3d.ai/v3/generation/multiview-to-model";
                 const taskPayload = {
                     "inputs": [
                         {"front": tokens.front},
@@ -179,7 +192,7 @@
                     "pbr": true
                 };
 
-               const taskRes = await fetch("/api/generate", {
+                const taskRes = await fetch(generateUrl, {
                     method: "POST",
                     headers: {
                         "Authorization": `Bearer ${API_KEY}`,
@@ -188,7 +201,11 @@
                     body: JSON.stringify(taskPayload)
                 });
                 
-                if(!taskRes.ok) throw new Error("Task creation failed on Tripo servers.");
+                if(!taskRes.ok) {
+                    const errorDetails = await taskRes.text();
+                    throw new Error(`Generation failed: ${errorDetails}`);
+                }
+                
                 const taskData = await taskRes.json();
                 const taskId = taskData.data.task_id;
 
@@ -196,20 +213,22 @@
                 pollTaskStatus(taskId);
 
             } catch (error) {
-                console.error("Tripo API Error:", error);
+                console.error("API Error:", error);
                 statusText.innerText = "Error: " + error.message;
-                statusText.style.color = "red";
+                statusText.style.color = "#ff4444";
             }
         }
 
         function pollTaskStatus(taskId) {
+            const taskUrl = CORS_PROXY + `https://openapi.tripo3d.ai/v3/task/${taskId}`;
+            
             const pollInterval = setInterval(async () => {
                 try {
-                    // Check v3 Task Status
-              const response = await fetch(`/api/task/${taskId}`, {
+                    const response = await fetch(taskUrl, {
                         method: "GET",
                         headers: { "Authorization": `Bearer ${API_KEY}` }
                     });
+                    
                     const taskData = await response.json();
                     const status = taskData.data.status; 
 
@@ -221,19 +240,18 @@
                         clearInterval(pollInterval);
                         statusText.innerText = "Success! Avatar Generated.";
                         
-                        // Display the real generated 3D Model
                         viewer.src = taskData.data.output.model; 
                         viewer.style.display = "block";
                     } 
                     else if (status === "failed" || status === "cancelled") {
                         clearInterval(pollInterval);
                         statusText.innerText = "Error: Generation failed on Tripo Servers.";
-                        statusText.style.color = "red";
+                        statusText.style.color = "#ff4444";
                     }
                 } catch (error) {
                     console.error("Polling Error:", error);
                 }
-            }, 3000); // Checks every 3 seconds
+            }, 3000); 
         }
     </script>
 </body>
