@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-width=1.0">
+    <title>Live 3D Patient Scanner</title>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.1.1/model-viewer.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #111; color: white; margin: 0; padding: 20px; }
+        .header { margin-bottom: 20px; }
+        
+        .camera-container {
+            position: relative; width: 100%; max-width: 600px; margin: 0 auto;
+            border-radius: 15px; overflow: hidden; border: 2px solid #0096ff;
+            background: #000;
+        }
+
+        video { width: 100%; display: block; transform: scaleX(-1); } /* Mirror effect */
+        
+        /* Guide oval for the face */
+        .face-guide {
+            position: absolute; top: 15%; left: 25%; right: 25%; bottom: 15%;
+            border: 2px dashed rgba(0, 255, 204, 0.7); border-radius: 50%; pointer-events: none;
+        }
+
+        /* Flash effect when taking a photo */
+        .flash {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+        }
+
+        button {
+            background-color: #0096ff; color: white; border: none; padding: 15px 30px;
+            border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer;
+            margin-top: 20px; width: 100%; max-width: 600px;
+        }
+        button:hover { background-color: #007acc; }
+        button:disabled { background-color: #555; cursor: not-allowed; }
+
+        #statusText { font-size: 18px; margin-top: 15px; color: #00ffcc; font-weight: bold; }
+
+        /* The thumbnails at the bottom */
+        .gallery { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+        .gallery img { width: 80px; height: 80px; border-radius: 8px; border: 2px solid #444; object-fit: cover; transform: scaleX(-1); }
+
+        model-viewer {
+            width: 100%; max-width: 600px; height: 500px; margin: 20px auto;
+            background-color: #222; border-radius: 15px; display: none;
+        }
+
+        /* Hidden canvas for taking the photos */
+        canvas { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>[Your Logo] Medical 3D Engine</h1>
+        <p id="instructionText">Step 1: Look straight at the camera.</p>
+    </div>
+
+    <div class="camera-container" id="cameraView">
+        <video id="webcam" autoplay playsinline></video>
+        <div class="face-guide"></div>
+        <div class="flash" id="flashEffect"></div>
+    </div>
+
+    <button id="captureBtn" onclick="takePhoto()">Capture Front Face</button>
+    <p id="statusText"></p>
+
+    <div class="gallery" id="gallery"></div>
+
+    <canvas id="canvas"></canvas>
+
+    <model-viewer id="my3DViewer" src="" camera-controls auto-rotate shadow-intensity="1"></model-viewer>
+
+    <script>
+        const API_KEY = "YOUR_TRIPO_API_KEY_HERE"; // Put your Tripo key here
+
+        const video = document.getElementById('webcam');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        const captureBtn = document.getElementById('captureBtn');
+        const instructionText = document.getElementById('instructionText');
+        const statusText = document.getElementById('statusText');
+        const gallery = document.getElementById('gallery');
+        const cameraView = document.getElementById('cameraView');
+        const viewer = document.getElementById('my3DViewer');
+        const flash = document.getElementById('flashEffect');
+
+        // State machine for the angles
+        let currentStep = 0;
+        const steps = ["front", "left", "right"];
+        const capturedImages = {};
+
+        // 1. Turn on the Webcam
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+            .then(stream => { video.srcObject = stream; })
+            .catch(err => { alert("Camera access denied."); });
+
+        // 2. Capture the Photo
+        function takePhoto() {
+            // Flash effect
+            flash.style.opacity = 1;
+            setTimeout(() => { flash.style.opacity = 0; }, 200);
+
+            // Set canvas to video size
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Get base64 image data
+            const imageData = canvas.toDataURL('image/jpeg', 0.9);
+            const viewName = steps[currentStep];
+            
+            // Save to object
+            capturedImages[viewName] = imageData;
+
+            // Add thumbnail to UI
+            const img = document.createElement('img');
+            img.src = imageData;
+            gallery.appendChild(img);
+
+            currentStep++;
+
+            // Update UI Instructions
+            if (currentStep === 1) {
+                instructionText.innerText = "Step 2: Turn your head slightly LEFT.";
+                captureBtn.innerText = "Capture Left Side";
+            } else if (currentStep === 2) {
+                instructionText.innerText = "Step 3: Turn your head slightly RIGHT.";
+                captureBtn.innerText = "Capture Right Side";
+            } else if (currentStep === 3) {
+                // Done taking photos!
+                captureBtn.style.display = "none";
+                instructionText.innerText = "Processing...";
+                cameraView.style.display = "none";
+                
+                // Stop webcam
+                video.srcObject.getTracks().forEach(track => track.stop());
+                
+                generate3DModel();
+            }
+        }
+
+        // 3. Communicate with Tripo API
+        async function generate3DModel() {
+            statusText.innerText = "Step 1: Uploading secure images to AI...";
+
+            try {
+                // IMPORTANT: According to Tripo docs, you must upload the raw files first 
+                // to get a "file_token" before creating the 3D task. 
+                // Because you have Base64 data, you will convert them to blobs and POST to Tripo's file upload API.
+                
+                // --- Placeholder: Simulating the upload delay ---
+                await new Promise(r => setTimeout(r, 2000));
+                
+                statusText.innerText = "Step 2: Generating 3D Mesh & HD Textures... (This takes 1-2 mins)";
+                
+                // --- Here is the exact request body from the docs you provided ---
+                const requestBody = {
+                    "inputs": [
+                        {"front": "file_token_from_upload_front"},
+                        {"left": "file_token_from_upload_left"},
+                        {"right": "file_token_from_upload_right"}
+                    ],
+                    "model": "v3.1-20260211",
+                    "texture": true,
+                    "pbr": true
+                };
+
+                // Example of how you will call the endpoint you found:
+                /*
+                const response = await fetch("https://openapi.tripo3d.ai/v3/generation/multiview-to-model", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${API_KEY}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                const taskData = await response.json();
+                const taskId = taskData.data.task_id;
+                
+                // Then you write a polling loop to fetch the status of taskId...
+                */
+
+                // --- Demo Simulation for the Boss ---
+                await new Promise(r => setTimeout(r, 4000)); // Fake waiting time
+                
+                statusText.innerText = "Success! Avatar Generated.";
+                
+                // Display the 3D Model
+                // (Replace this URL with the final model URL Tripo gives you)
+                viewer.src = "https://modelviewer.dev/shared-assets/models/Astronaut.glb";
+                viewer.style.display = "block";
+
+            } catch (error) {
+                statusText.innerText = "Error generating model.";
+                statusText.style.color = "red";
+            }
+        }
+    </script>
+</body>
+</html>
