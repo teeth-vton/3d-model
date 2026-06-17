@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    { 
+      "source": "/api/upload", 
+      "destination": "https://api.tripo3d.ai/v2/openapi/upload" 
+    },
+    { 
+      "source": "/api/generate", 
+      "destination": "https://openapi.tripo3d.ai/v3/generation/multiview-to-model" 
+    },
+    { 
+      "source": "/api/task/:id", 
+      "destination": "https://openapi.tripo3d.ai/v3/task/:id" 
+    }
+  ]
+}
