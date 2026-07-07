@@ -5,21 +5,388 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ultimate Smile Design - Live Agent</title>
     <style>
+        /**
+         * ============================================================================
+         * GLOBAL CORE CONFIGURATION & FONTS
+         * ============================================================================
+         */
+        :root {
+            --font-Glida-Display: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
         body {
             background-color: #000000;
             color: #ffffff;
             margin: 0;
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
         }
-        #usd-voice-widget {
+
+        /**
+         * ============================================================================
+         * USER INTERFACE LAYOUT & CLASSES (MATCHING TARGET DESIGN)
+         * ============================================================================
+         */
+        .voice_agent_main {
+            height: auto;
+            width: auto;
             position: fixed;
-            bottom: 30px;
-            right: 30px;
+            bottom: 40px;
+            right: 40px;
             z-index: 99999;
             display: flex;
             flex-direction: column;
             align-items: flex-end;
         }
+
+        .voice_chat_bot_container {
+            width: 400px;
+            height: 652px;
+            background-color: #000000;
+            box-shadow: 0px 0px 16.7px 0px rgba(255, 255, 255, 0.25);
+            border-radius: 14px;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.8) translateY(20px);
+            transform-origin: bottom right;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            overflow: hidden;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .voice_chat_bot_container.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1) translateY(0);
+            pointer-events: auto;
+        }
+
+        .glow_icon_in_chat_box {
+            width: 230px;
+            height: 230px;
+            position: absolute;
+            top: -50px;
+            left: -40px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .glow_icon_in_chat_box::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 14px;
+            background: linear-gradient(
+                270deg,
+                #be9644,
+                #aa803c,
+                #f3dc87,
+                #fbefac,
+                #f3dc87,
+                #aa803c,
+                #c49d47
+            );
+            filter: blur(180px);
+            opacity: 0.5;
+        }
+
+        .voice_icon_title_and_close_icon_main {
+            width: 100%;
+            height: 45px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            padding: 0 12px;
+            box-sizing: border-box;
+            margin-top: 15px;
+        }
+
+        .header_voice_icon {
+            width: 30px;
+            height: 30px;
+            display: block;
+            cursor: pointer;
+            z-index: 99999;
+        }
+
+        .header_voice_icon > img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .header_title {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat_bot_label {
+            font-size: 24px;
+            letter-spacing: 1.5px;
+            font-family: var(--font-Glida-Display);
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .header_close_icon {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        #usd-close-btn {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0;
+            transition: color 0.2s;
+        }
+
+        #usd-close-btn:hover {
+            color: #ff4444;
+        }
+
+        .chat_box_icon_inside_main {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 16px;
+        }
+
+        .chat_box_icon_inside {
+            width: 114px;
+            height: 114px;
+        }
+
+        .chat_box_inside_bot_icon {
+            width: 114px;
+            height: 114px;
+        }
+
+        .chat_box_icon_inside > img {
+            width: 100%;
+            height: 100%;
+        }
+
+        .chat_main_container {
+            width: 100%;
+            height: 310px;
+            margin-top: 20px;
+            padding: 16px 16px 8px 16px;
+            overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            flex-grow: 1;
+        }
+
+        .chat_main_container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .bot_message {
+            position: relative;
+            background-color: #080808;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin-bottom: 24px;
+            max-width: 85%;
+            color: #ffffff;
+            font-size: 14px;
+            line-height: 1.5;
+            align-self: flex-start;
+            margin-left: 8px;
+            font-family: inherit;
+            letter-spacing: 0.5px;
+            box-sizing: border-box;
+        }
+
+        .bot_message > p {
+            margin: 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .bot_message::before {
+            content: "";
+            position: absolute;
+            left: -8.6px;
+            bottom: 25%;
+            width: 16px;
+            height: 16px;
+            background-color: #080808;
+            border-left: 1px solid rgba(255, 255, 255, 0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            transform: rotate(-45deg);
+            border-top-left-radius: 2px;
+        }
+
+        .user_message {
+            align-self: flex-end;
+            text-align: left;
+            color: #e0e0e0;
+            font-size: 14px;
+            margin-bottom: 24px;
+            max-width: 85%;
+            line-height: 1.5;
+            font-family: inherit;
+            letter-spacing: 0.5px;
+            box-sizing: border-box;
+        }
+
+        .user_message > p {
+            margin: 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .chat_icon_and_voice_and_close_icon_container_main {
+            width: 100%;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            padding: 16px;
+            box-sizing: border-box;
+        }
+
+        .chat_icon_main {
+            width: 30px;
+            height: 30px;
+            margin-bottom: 13px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .chat_icon_main:hover {
+            transform: scale(1.1);
+        }
+
+        .voice_icon_main {
+            width: 112px;
+            height: 112px;
+            cursor: pointer;
+        }
+
+        .voice_animation_icon {
+            width: 114px;
+            height: 114px;
+            overflow: visible;
+        }
+
+        .close_icon_main {
+            width: 30px;
+            height: 30px;
+            margin-bottom: 13px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .close_icon_main:hover {
+            transform: scale(1.1);
+        }
+
+        .massge_input_main {
+            width: 100%;
+            height: 55px;
+            padding: 0px 12px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+
+        .input_box_and_icon_main {
+            width: 100%;
+            height: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.03);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            box-sizing: border-box;
+        }
+
+        .chat_input_box {
+            width: 85%;
+            height: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #ffffff;
+            font-size: 18px;
+            font-family: inherit;
+        }
+
+        .chat_input_box::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 18px;
+        }
+
+        .send_button_icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .send_button_icon:hover {
+            transform: scale(1.1);
+        }
+
+        .voice_chat_bot_icon_container {
+            width: 92px;
+            height: 92px;
+            border-radius: 50%;
+            cursor: pointer;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            pointer-events: auto;
+            box-shadow: 0px 0px 16.7px 0px rgba(255, 255, 255, 0.25);
+        }
+
+        .voice_chat_bot_icon_container.hidden {
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.5);
+            pointer-events: none;
+        }
+
+        .home_screen_bot_icon {
+            width: 93px;
+            height: 93px;
+        }
+
+        /**
+         * ============================================================================
+         * TOOLTIP STYLES (PRESERVED FROM CORE CONFIG)
+         * ============================================================================
+         */
         #usd-tooltip {
             background: #D4AF37;
             color: #111;
@@ -35,7 +402,9 @@
             display: block; 
             transition: opacity 0.3s ease-in-out;
             opacity: 1;
+            z-index: 1000;
         }
+
         #usd-tooltip::after {
             content: '';
             position: absolute;
@@ -45,114 +414,21 @@
             border-style: solid;
             border-color: #D4AF37 transparent transparent transparent;
         }
+
         @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
+            0%, 100% { 
+                transform: translateY(0); 
+            }
+            50% { 
+                transform: translateY(-5px); 
+            }
         }
-        @keyframes floatContainer {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
-            100% { transform: translateY(0px); }
-        }
-        #usd-chat-container {
-            width: 320px;
-            max-height: 380px;
-            background-color: #111111;
-            border: 1px solid #333333; 
-            border-radius: 15px;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            display: none;
-            flex-direction: column;
-            position: relative; 
-            animation: floatContainer 4s ease-in-out infinite;
-            transform: translateZ(0);
-            backface-visibility: hidden;
-        }
-        #usd-chat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 10px;
-            margin-bottom: 10px;
-        }
-        #usd-header-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        #usd-status-box {
-            color: #D4AF37;
-            font-size: 13px;
-            font-weight: bold;
-        }
-        #usd-header-right {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        #usd-mode-toggle {
-            background: #222;
-            color: #D4AF37;
-            border: 1px solid #D4AF37;
-            border-radius: 20px;
-            padding: 4px 10px;
-            font-size: 11px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        #usd-mode-toggle:hover { background: #D4AF37; color: #111; }
-        #usd-visualizer {
-            display: flex;
-            gap: 3px;
-            align-items: center;
-            height: 20px;
-        }
-        .usd-bar {
-            width: 3px;
-            background: #D4AF37;
-            border-radius: 3px;
-            height: 4px; 
-            transition: height 0.2s ease;
-        }
-        #usd-visualizer.active .usd-bar { animation: usd-sound 0.4s ease-in-out infinite alternate; }
-        #usd-visualizer.active .usd-bar:nth-child(1) { animation-delay: 0.0s; }
-        #usd-visualizer.active .usd-bar:nth-child(2) { animation-delay: 0.2s; }
-        #usd-visualizer.active .usd-bar:nth-child(3) { animation-delay: 0.1s; }
-        #usd-visualizer.active .usd-bar:nth-child(4) { animation-delay: 0.3s; }
-        #usd-visualizer.active .usd-bar:nth-child(5) { animation-delay: 0.1s; }
-        @keyframes usd-sound { 0% { height: 4px; } 100% { height: 18px; } }
-        #usd-close-btn {
-            background: none;
-            border: none;
-            color: #888;
-            font-size: 18px;
-            cursor: pointer;
-            padding: 0;
-            transition: color 0.2s;
-        }
-        #usd-close-btn:hover { color: #ff4444; }
-        #usd-chat-log {
-            overflow-y: auto;
-            flex-grow: 1;
-            margin-bottom: 10px;
-            max-height: 210px;
-            padding-right: 5px;
-        }
-        #usd-chat-log::-webkit-scrollbar { width: 4px; }
-        #usd-chat-log::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
-        .msg { margin-bottom: 8px; font-size: 13px; line-height: 1.4; }
-        .msg-user { color: #ffffff; text-align: right; }
-        .msg-bot { color: #D4AF37; text-align: left; }
-        .msg-error { color: #ff4444; text-align: left; font-size: 11px; background: rgba(255,68,68,0.1); padding: 6px; border-radius: 5px; margin-top: 5px; }
-        .usd-msg-text {
-            white-space: pre-wrap;
-            word-break: break-word;
-            display: inline-block;
-        }
+
+        /**
+         * ============================================================================
+         * ACTION LINK CARDS & RATING STYLES
+         * ============================================================================
+         */
         .usd-link-card {
             display: block;
             width: 100%;
@@ -169,17 +445,111 @@
             box-sizing: border-box;
             transition: all 0.2s;
         }
+
         .usd-link-card:hover {
             background: #D4AF37;
             color: #111111;
             transform: translateY(-2px);
         }
-        #usd-interim-text { text-align: right; font-style: italic; font-size: 12px; font-weight: bold; min-height: 16px; margin-bottom: 5px; transition: color 0.2s; }
-        
-        /* LIVE TRANSCRIPT POPUP */
+
+        #usd-inline-rating {
+            display: none;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding: 15px;
+            text-align: center;
+            margin-top: auto;
+        }
+
+        #usd-rating-title { 
+            color: #fff; 
+            font-size: 15px; 
+            margin-bottom: 12px; 
+            font-weight: bold; 
+            letter-spacing: 0.5px;
+        }
+
+        .usd-stars { 
+            display: flex; 
+            justify-content: center; 
+            gap: 12px; 
+            cursor: pointer; 
+        }
+
+        .usd-star { 
+            font-size: 28px; 
+            color: #333333; 
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            transition: transform 0.2s, color 0.2s, text-shadow 0.2s; 
+        }
+
+        .usd-star:hover, .usd-star.active { 
+            color: #FFD700; 
+            transform: scale(1.2);
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+        }
+
+        #usd-rating-thanks { 
+            display: none; 
+            color: #D4AF37; 
+            font-size: 13px; 
+            margin-top: 12px; 
+            font-weight: bold; 
+        }
+
+        #usd-end-confirm-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(10, 10, 10, 0.95);
+            border-radius: 14px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 101;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .usd-confirm-title { 
+            color: #fff; 
+            font-size: 16px; 
+            margin-bottom: 20px; 
+            font-weight: bold; 
+        }
+
+        .usd-confirm-btns { 
+            display: flex; 
+            gap: 15px; 
+        }
+
+        .usd-btn-yes { 
+            background: #ff4444; 
+            color: #fff; 
+            border: none; 
+            padding: 8px 20px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-weight: bold; 
+        }
+
+        .usd-btn-no { 
+            background: #444; 
+            color: #fff; 
+            border: none; 
+            padding: 8px 20px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-weight: bold; 
+        }
+
+        /**
+         * ============================================================================
+         * LIVE TRANSCRIPT POPUP
+         * ============================================================================
+         */
         #usd-live-transcript-popup {
             display: none;
-            margin-bottom: 10px;
+            margin: 10px 16px;
             padding: 10px 12px;
             border-radius: 10px;
             background: rgba(212, 175, 55, 0.10);
@@ -188,6 +558,7 @@
             position: relative;
             z-index: 5;
         }
+
         #usd-live-transcript-label {
             color: #D4AF37;
             font-size: 11px;
@@ -196,6 +567,7 @@
             letter-spacing: 0.6px;
             margin-bottom: 4px;
         }
+
         #usd-live-transcript-text {
             color: #ffffff;
             font-size: 13px;
@@ -205,130 +577,410 @@
             max-height: 70px;
             overflow-y: auto;
         }
+
         #usd-live-transcript-link-wrap {
             display: none;
             margin-top: 8px;
         }
+
         #usd-live-transcript-link-wrap .usd-link-card {
             margin-top: 0;
             font-size: 11px;
             padding: 9px 10px;
         }
 
-        #usd-input-container {
-            display: none; 
-            border-top: 1px solid rgba(255,255,255,0.1);
-            padding-top: 10px;
+        /**
+         * ============================================================================
+         * VOICE RIPPLE ANIMATION
+         * ============================================================================
+         */
+        @keyframes ripplePulse {
+            0% {
+                transform: scale(0.9);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.2;
+            }
+            100% {
+                transform: scale(0.9);
+                opacity: 0.8;
+            }
         }
-        #usd-text-input {
-            flex-grow: 1;
-            background: #222;
-            border: 1px solid #444;
-            color: #fff;
-            border-radius: 4px;
-            padding: 6px 10px;
-            font-size: 13px;
-            outline: none;
-        }
-        #usd-text-input:focus { border-color: #D4AF37; }
-        #usd-send-btn {
-            background: #D4AF37;
-            color: #111;
-            border: none;
-            border-radius: 4px;
-            padding: 6px 12px;
-            margin-left: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 13px;
-        }
-        #usd-send-btn:hover { background: #FFF8DC; }
-        
-        #usd-bubble {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #FFD700, #B8860B);
-            border-radius: 50%;
-            cursor: pointer;
-            --pulse-max: 20px; 
-            box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7);
-            animation: usd-pulse 2s infinite;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 3px solid #111111;
-            transition: transform 0.2s ease-in-out;
-            user-select: none;
-        }
-        #usd-bubble:hover { transform: scale(1.05); }
-        #usd-bubble:active { transform: scale(0.95); }
-        @keyframes usd-pulse {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 var(--pulse-max) rgba(212, 175, 55, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
-        }
-        #usd-inline-rating {
-            display: none;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            padding-top: 15px;
-            text-align: center;
-        }
-        #usd-rating-title { color: #fff; font-size: 15px; margin-bottom: 12px; font-weight: bold; letter-spacing: 0.5px;}
-        .usd-stars { display: flex; justify-content: center; gap: 12px; cursor: pointer; }
-        .usd-star { 
-            font-size: 28px; 
-            color: #333333; 
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-            transition: transform 0.2s, color 0.2s, text-shadow 0.2s; 
-        }
-        .usd-star:hover, .usd-star.active { 
-            color: #FFD700; 
-            transform: scale(1.2);
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
-        }
-        #usd-rating-thanks { display: none; color: #D4AF37; font-size: 13px; margin-top: 12px; font-weight: bold; }
-        #usd-end-confirm-overlay {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(10, 10, 10, 0.95);
-            border-radius: 15px;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 101;
-            text-align: center;
-            padding: 20px;
-        }
-        .usd-confirm-title { color: #fff; font-size: 16px; margin-bottom: 20px; font-weight: bold; }
-        .usd-confirm-btns { display: flex; gap: 15px; }
-        .usd-btn-yes { background: #ff4444; color: #fff; border: none; padding: 8px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .usd-btn-no { background: #444; color: #fff; border: none; padding: 8px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
 
-        @media (max-width: 480px) {
-            #usd-voice-widget { bottom: 15px; right: 15px; }
-            #usd-bubble { width: 50px; height: 50px; } 
-            #usd-bubble svg { width: 24px; height: 24px; }
-            #usd-chat-container { 
-                width: calc(100vw - 40px); 
-                max-height: 380px; 
-                padding: 12px; 
+        .voice_icon_main svg .ripple-1,
+        .voice_icon_main svg .ripple-2,
+        .voice_icon_main svg .ripple-3 {
+            transform-origin: 57px 57px;
+        }
+
+        .voice_icon_main.is-listening svg .ripple-1 {
+            animation: ripplePulse 1.5s infinite ease-in-out;
+        }
+
+        .voice_icon_main.is-listening svg .ripple-2 {
+            animation: ripplePulse 1.5s infinite ease-in-out 0.2s;
+        }
+
+        .voice_icon_main.is-listening svg .ripple-3 {
+            animation: ripplePulse 1.5s infinite ease-in-out 0.4s;
+        }
+
+        /**
+         * ============================================================================
+         * SIRI ORB ANIMATIONS
+         * ============================================================================
+         */
+        @keyframes siriRotateCW {
+            0% {
+                transform: rotate(0deg) scale(1);
+            }
+            50% {
+                transform: rotate(180deg) scale(1.05);
+            }
+            100% {
+                transform: rotate(360deg) scale(1);
+            }
+        }
+
+        @keyframes siriRotateCCW {
+            0% {
+                transform: rotate(360deg) scale(1);
+            }
+            50% {
+                transform: rotate(180deg) scale(1.02);
+            }
+            100% {
+                transform: rotate(0deg) scale(1);
+            }
+        }
+
+        @keyframes siriPulseBase {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.08);
+            }
+        }
+
+        .voice_chat_bot_icon_container svg path,
+        .chat_box_icon_inside svg path {
+            transform-origin: 60px 60px;
+        }
+
+        .voice_chat_bot_icon_container svg .siri-1,
+        .chat_box_icon_inside svg .siri-1 {
+            animation: siriRotateCW 4s linear infinite;
+        }
+        .voice_chat_bot_icon_container svg .siri-2,
+        .chat_box_icon_inside svg .siri-2 {
+            animation: siriRotateCCW 6s linear infinite;
+        }
+        .voice_chat_bot_icon_container svg .siri-3,
+        .chat_box_icon_inside svg .siri-3 {
+            animation: siriRotateCW 5s ease-in-out infinite;
+        }
+        .voice_chat_bot_icon_container svg .siri-4,
+        .chat_box_icon_inside svg .siri-4 {
+            animation: siriRotateCCW 7s linear infinite;
+        }
+        .voice_chat_bot_icon_container svg .siri-5,
+        .chat_box_icon_inside svg .siri-5 {
+            animation: siriRotateCW 4.5s ease-in-out infinite;
+        }
+        .voice_chat_bot_icon_container svg .siri-6,
+        .chat_box_icon_inside svg .siri-6 {
+            animation: siriRotateCCW 5.5s linear infinite;
+        }
+        .voice_chat_bot_icon_container svg .siri-7,
+        .chat_box_icon_inside svg .siri-7 {
+            animation: siriPulseBase 3s ease-in-out infinite;
+        }
+        .voice_chat_bot_icon_container svg .siri-8,
+        .chat_box_icon_inside svg .siri-8 {
+            animation: siriRotateCCW 7.5s linear infinite;
+        }
+
+        /**
+         * ============================================================================
+         * MOBILE RESPONSIVENESS & ADAPTATIONS
+         * ============================================================================
+         */
+        @media (max-width: 1540px) and (max-height: 750px) {
+            .voice_agent_main {
+                bottom: 30px;
+                right: 30px;
+            }
+            .chat_main_container {
+                height: 274px;
+            }
+            .voice_chat_bot_container {
+                height: 615px;
+            }
+        }
+
+        @media (max-width: 1285px) and (max-height: 600px) {
+            .voice_agent_main {
+                bottom: 20px;
+                right: 20px;
+            }
+            .voice_chat_bot_icon_container {
+                width: 60px;
+                height: 60px;
+            }
+            .home_screen_bot_icon {
+                width: 60px;
+                height: 60px;
+            }
+            .voice_chat_bot_container {
+                width: 300px;
+                height: 440px;
+                border-radius: 10px;
+            }
+            .voice_icon_title_and_close_icon_main {
+                width: 100%;
+                height: 24px;
+            }
+            .header_voice_icon {
+                width: 20px;
+                height: 20px;
+            }
+            .chat_bot_label {
+                font-size: 14px;
+                margin-top: 35px;
+            }
+            .header_close_icon {
+                width: 20px;
+                height: 20px;
+            }
+            .chat_box_icon_inside_main {
+                margin-top: 12px;
+            }
+            .chat_box_icon_inside {
+                width: 70px;
+                height: 70px;
+            }
+            .chat_box_inside_bot_icon {
+                width: 70px;
+                height: 70px;
+            }
+            .chat_main_container {
+                height: 236px;
+                margin-top: 12px;
+                padding: 0px 16px 8px 16px;
+            }
+            .bot_message {
+                padding: 8px 10px;
+                margin-bottom: 10px;
+                max-width: 90%;
+                font-size: 12px;
+                margin-left: 0px;
+            }
+            .bot_message::before {
+                left: -5.6px;
+                width: 12px;
+                height: 12px;
+            }
+            .user_message {
+                font-size: 12px;
+                margin-bottom: 10px;
+                max-width: 90%;
+            }
+            .chat_icon_and_voice_and_close_icon_container_main {
+                padding: 12px;
+                align-items: center;
+            }
+            .chat_icon_main {
+                width: 20px;
+                height: 20px;
+                margin-bottom: 0px;
+            }
+            .voice_icon_main {
+                width: 60px;
+                height: 60px;
+            }
+            .voice_animation_icon {
+                width: 60px;
+                height: 60px;
+            }
+            .close_icon_main {
+                width: 20px;
+                height: 20px;
+                margin-bottom: 0px;
+            }
+            .massge_input_main {
+                height: 41px;
+                margin-top: 20px;
+                margin-bottom: 20px;
+            }
+            .input_box_and_icon_main {
+                padding: 0 8px;
+            }
+            .chat_input_box {
+                font-size: 12px;
+            }
+            .chat_input_box::placeholder {
+                font-size: 12px;
+            }
+            .send_button_icon {
+                width: 20px;
+                height: 20px;
+            }
+        }
+
+        @media (max-width: 1200px) and (max-height: 700px) {
+            .voice_agent_main {
+                bottom: 25px;
+                right: 25px;
+            }
+            .chat_main_container {
+                height: 230px;
+            }
+            .voice_chat_bot_container {
+                height: 570px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .voice_agent_main {
+                bottom: 20px;
+                right: 15px;
+            }
+            .voice_chat_bot_icon_container {
+                width: 69px;
+                height: 69px;
+            }
+            .voice_chat_bot_container {
+                height: 620px;
+                width: calc(100vw - 30px);
+            }
+            .home_screen_bot_icon {
+                width: 70px;
+                height: 70px;
+            }
+            .chat_bot_label {
+                font-size: 18px;
+            }
+            .chat_box_icon_inside_main {
+                margin-top: 10px;
+            }
+            .chat_box_icon_inside {
+                width: 90px;
+                height: 90px;
+            }
+            .chat_box_inside_bot_icon {
+                width: 90px;
+                height: 90px;
+            }
+            .chat_main_container {
+                height: 350px;
+                margin-top: 15px;
+            }
+            .bot_message {
+                padding: 10px 12px;
+                margin-bottom: 16px;
+                max-width: 90%;
+                font-size: 12px;
+                margin-left: 5px;
+            }
+            .user_message {
+                font-size: 12px;
+                margin-bottom: 16px;
+                max-width: 90%;
+            }
+            .bot_message::before {
+                left: -6.6px;
+                width: 12px;
+                height: 12px;
+            }
+            .chat_icon_and_voice_and_close_icon_container_main {
+                padding: 12px;
+            }
+            .chat_icon_main {
+                width: 24px;
+                height: 24px;
+                margin-bottom: 10px;
+            }
+            .close_icon_main {
+                width: 24px;
+                height: 24px;
+                margin-bottom: 10px;
+            }
+            .voice_icon_main {
+                width: 90px;
+                height: 90px;
+            }
+            .voice_animation_icon {
+                width: 90px;
+                height: 90px;
+            }
+            .header_voice_icon {
+                width: 24px;
+                height: 24px;
+            }
+            .header_close_icon {
+                width: 24px;
+                height: 24px;
+            }
+            .voice_icon_title_and_close_icon_main {
+                width: 100%;
+                height: 34px;
+            }
+            .massge_input_main {
+                width: 100%;
+                height: 45px;
+                padding: 0px 12px;
+                margin-top: 18px;
+                margin-bottom: 20px;
+            }
+            .chat_input_box {
+                font-size: 14px;
+            }
+            .chat_input_box::placeholder {
+                font-size: 14px;
+            }
+            .input_box_and_icon_main {
+                padding: 0 10px;
+            }
+            #usd-tooltip { 
+                font-size: 12px; 
+                padding: 8px 12px; 
                 margin-bottom: 10px; 
             }
-            #usd-chat-log { max-height: 160px; } 
-            #usd-tooltip { font-size: 12px; padding: 8px 12px; margin-bottom: 10px; }
-            #usd-tooltip::after { right: 20px; }
+            #usd-tooltip::after { 
+                right: 20px; 
+            }
+        }
+
+        @media (max-width: 435px) {
+            .voice_chat_bot_container {
+                width: 350px;
+            }
+        }
+
+        @media (max-width: 370px) {
+            .voice_chat_bot_container {
+                width: 330px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div id="usd-voice-widget">
+    <div id="usd-voice-widget" class="voice_agent_main">
+        <!-- TOOLTIP -->
         <div id="usd-tooltip" onclick="openChat(false)">
             Namaste! Tap here to talk about your new smile!
         </div>
 
-        <div id="usd-chat-container">
+        <!-- MAIN CHAT CONTAINER -->
+        <div id="usd-chat-container" class="voice_chat_bot_container">
+            <!-- GLOWING ORB DECORATION -->
+            <div class="glow_icon_in_chat_box"></div>
+
+            <!-- CALL CANCELLATION OVERLAY -->
             <div id="usd-end-confirm-overlay">
                 <div class="usd-confirm-title">Want to end the call?</div>
                 <div class="usd-confirm-btns">
@@ -337,35 +989,114 @@
                 </div>
             </div>
 
-            <div id="usd-chat-inner-wrap" style="height: 100%; display: flex; flex-direction: column;">
-                <div id="usd-chat-header">
-                    <div id="usd-header-left">
-                        <img src="https://raw.githubusercontent.com/teeth-vton/sd-voice-backend/dab01d9f2e96be2fcda278af63db62dfef9e1559/Gemini_Generated_Image_67gd1767gd1767gd.png" alt="USD Assistant" width="24" height="24" style="object-fit: contain;">
-                        <div id="usd-status-box">Connected 🟢</div>
+            <div id="usd-chat-inner-wrap" style="height: 100%; display: flex; flex-direction: column; position: relative; z-index: 10;">
+                
+                <!-- HEADER -->
+                <div class="voice_icon_title_and_close_icon_main">
+                    <div class="header_voice_icon" id="usd-header-left" style="display: flex; align-items: center;">
+                        <img src="https://raw.githubusercontent.com/teeth-vton/sd-voice-backend/dab01d9f2e96be2fcda278af63db62dfef9e1559/Gemini_Generated_Image_67gd1767gd1767gd.png" alt="USD Assistant">
                     </div>
-                    <div id="usd-header-right">
-                        <button id="usd-mode-toggle" onclick="toggleChatMode()">💬 Text</button>
-                        <div id="usd-visualizer">
-                            <div class="usd-bar"></div><div class="usd-bar"></div><div class="usd-bar"></div><div class="usd-bar"></div><div class="usd-bar"></div>
-                        </div>
+                    <div class="header_title">
+                        <div class="chat_bot_label">Ultimate Smile Design</div>
+                        <div id="usd-status-box" style="color: #D4AF37; font-size: 11px; font-weight: bold; margin-top: 3px;">Connected 🟢</div>
+                    </div>
+                    <div class="header_close_icon">
                         <button id="usd-close-btn" onclick="closeChatBtnClicked()">✕</button>
                     </div>
                 </div>
 
+                <!-- TOP ANIMATED ORB VISUALIZER -->
+                <div class="chat_box_icon_inside_main">
+                    <div class="chat_box_icon_inside">
+                        <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" class="chat_box_inside_bot_icon">
+                            <defs>
+                                <radialGradient id="grad1" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" stop-color="#FFD700" stop-opacity="0.85"/>
+                                    <stop offset="100%" stop-color="#B8860B" stop-opacity="0"/>
+                                </radialGradient>
+                                <radialGradient id="grad2" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" stop-color="#D4AF37" stop-opacity="0.85"/>
+                                    <stop offset="100%" stop-color="#8B6508" stop-opacity="0"/>
+                                </radialGradient>
+                                <radialGradient id="grad3" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" stop-color="#FFF8DC" stop-opacity="0.85"/>
+                                    <stop offset="100%" stop-color="#D4AF37" stop-opacity="0"/>
+                                </radialGradient>
+                            </defs>
+                            <path class="siri-1" d="M60 20 C80 20 100 40 100 60 C100 80 80 100 60 100 C40 100 20 80 20 60 C20 40 40 20 60 20 Z" fill="url(#grad1)"></path>
+                            <path class="siri-2" d="M60 25 C75 25 95 45 95 60 C95 75 75 95 60 95 C45 95 25 75 25 60 C25 45 45 25 60 25 Z" fill="url(#grad2)"></path>
+                            <path class="siri-3" d="M60 30 C70 30 90 50 90 60 C90 70 70 90 60 90 C50 90 30 70 30 60 C30 50 50 30 60 30 Z" fill="url(#grad3)"></path>
+                            <path class="siri-4" d="M60 35 C65 35 85 55 85 60 C85 65 65 85 60 85 C55 85 35 65 35 60 C35 55 55 35 60 35 Z" fill="url(#grad1)"></path>
+                            <path class="siri-5" d="M60 40 C70 40 80 45 80 60 C80 75 70 80 60 80 C50 80 40 75 40 60 C40 45 50 40 60 40 Z" fill="url(#grad2)"></path>
+                            <path class="siri-6" d="M60 45 C65 45 75 50 75 60 C75 70 65 75 60 75 C55 75 45 70 45 60 C45 50 55 45 60 45 Z" fill="url(#grad3)"></path>
+                            <path class="siri-7" d="M60 50 C62 50 70 52 70 60 C70 68 62 70 60 70 C58 70 50 68 50 60 C50 52 58 50 60 50 Z" fill="url(#grad1)"></path>
+                            <path class="siri-8" d="M60 55 C61 55 65 56 65 60 C65 64 61 65 60 65 C59 65 55 64 55 60 C55 56 59 55 60 55 Z" fill="url(#grad2)"></path>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- LIVE TRANSCRIPT POPUP -->
                 <div id="usd-live-transcript-popup">
                     <div id="usd-live-transcript-label">Assistant speaking</div>
                     <div id="usd-live-transcript-text"></div>
                     <div id="usd-live-transcript-link-wrap"></div>
                 </div>
 
-                <div id="usd-chat-log"></div>
-                <div id="usd-interim-text"></div>
+                <!-- CHAT LOG -->
+                <div id="usd-chat-log" class="chat_main_container"></div>
                 
-                <div id="usd-input-container">
-                    <input type="text" id="usd-text-input" placeholder="Type your message here..." onkeypress="handleKeyPress(event)">
-                    <button type="button" id="usd-send-btn" onclick="submitTextMessage()">Send</button>
+                <!-- INTERIM MIC TEXT -->
+                <div id="usd-interim-text" style="color: #D4AF37;"></div>
+                
+                <!-- CONTROLS FOOTER (VOICE MODE ACTIVE) -->
+                <div class="chat_icon_and_voice_and_close_icon_container_main" id="usd-voice-controls-footer">
+                    <div class="chat_icon_main" onclick="toggleChatMode()" title="Switch to Text Mode">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="voice_icon_main is-listening" id="usd-voice-trigger-btn">
+                        <svg viewBox="0 0 114 114" xmlns="http://www.w3.org/2000/svg" class="voice_animation_icon">
+                            <defs>
+                                <radialGradient id="rippleGrad" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" stop-color="#D4AF37" stop-opacity="0.4"/>
+                                    <stop offset="100%" stop-color="#D4AF37" stop-opacity="0"/>
+                                </radialGradient>
+                            </defs>
+                            <circle class="ripple-1" cx="57" cy="57" r="40" fill="url(#rippleGrad)" />
+                            <circle class="ripple-2" cx="57" cy="57" r="30" fill="url(#rippleGrad)" />
+                            <circle class="ripple-3" cx="57" cy="57" r="20" fill="url(#rippleGrad)" />
+                            <g transform="translate(45, 42)">
+                                <rect x="6" y="2" width="12" height="18" rx="6" fill="#D4AF37" />
+                                <path d="M2 11 A10 10 0 0 0 22 11" stroke="#D4AF37" stroke-width="2.5" fill="none" stroke-linecap="round" />
+                                <line x1="12" y1="21" x2="12" y2="26" stroke="#D4AF37" stroke-width="2.5" stroke-linecap="round" />
+                                <line x1="8" y1="26" x2="16" y2="26" stroke="#D4AF37" stroke-width="2.5" stroke-linecap="round" />
+                            </g>
+                        </svg>
+                    </div>
+                    <div class="close_icon_main" onclick="closeChatBtnClicked()" title="End Conversation">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#ff4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="9" y1="9" x2="15" y2="15"></line>
+                            <line x1="15" y1="9" x2="9" y2="15"></line>
+                        </svg>
+                    </div>
                 </div>
 
+                <!-- TEXT INPUT PANEL (TEXT MODE ACTIVE) -->
+                <div class="massge_input_main" id="usd-input-container">
+                    <div class="input_box_and_icon_main">
+                        <input type="text" id="usd-text-input" class="chat_input_box" placeholder="Type your message here..." onkeypress="handleKeyPress(event)">
+                        <div class="send_button_icon" id="usd-send-btn" onclick="submitTextMessage()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INLINE RATING -->
                 <div id="usd-inline-rating">
                     <div id="usd-rating-title">Rate your experience</div>
                     <div class="usd-stars">
@@ -377,19 +1108,48 @@
                     </div>
                     <div id="usd-rating-thanks">Thank you! Transcript sent to our team.</div>
                 </div>
+
+                <!-- INVISIBLE DOM HOSTS FOR RETRO COMPATIBILITY -->
+                <button id="usd-mode-toggle" style="display: none;"></button>
+                <div id="usd-visualizer" style="display: none;"></div>
             </div>
         </div>
         
-        <div id="usd-bubble" onclick="openChat(false)">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#111111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
-                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                <line x1="12" y1="19" x2="12" y2="22"></line>
+        <!-- FLOATING TRIGGER BUBBLE -->
+        <div id="usd-bubble" class="voice_chat_bot_icon_container" onclick="openChat(false)">
+            <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" class="home_screen_bot_icon">
+                <defs>
+                    <radialGradient id="bgrad1" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#FFD700" stop-opacity="0.85"/>
+                        <stop offset="100%" stop-color="#B8860B" stop-opacity="0"/>
+                    </radialGradient>
+                    <radialGradient id="bgrad2" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#D4AF37" stop-opacity="0.85"/>
+                        <stop offset="100%" stop-color="#8B6508" stop-opacity="0"/>
+                    </radialGradient>
+                    <radialGradient id="bgrad3" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#FFF8DC" stop-opacity="0.85"/>
+                        <stop offset="100%" stop-color="#D4AF37" stop-opacity="0"/>
+                    </radialGradient>
+                </defs>
+                <path class="siri-1" d="M60 20 C80 20 100 40 100 60 C100 80 80 100 60 100 C40 100 20 80 20 60 C20 40 40 20 60 20 Z" fill="url(#bgrad1)"></path>
+                <path class="siri-2" d="M60 25 C75 25 95 45 95 60 C95 75 75 95 60 95 C45 95 25 75 25 60 C25 45 45 25 60 25 Z" fill="url(#bgrad2)"></path>
+                <path class="siri-3" d="M60 30 C70 30 90 50 90 60 C90 70 70 90 60 90 C50 90 30 70 30 60 C30 50 50 30 60 30 Z" fill="url(#bgrad3)"></path>
+                <path class="siri-4" d="M60 35 C65 35 85 55 85 60 C85 65 65 85 60 85 C55 85 35 65 35 60 C35 55 55 35 60 35 Z" fill="url(#bgrad1)"></path>
+                <path class="siri-5" d="M60 40 C70 40 80 45 80 60 C80 75 70 80 60 80 C50 80 40 75 40 60 C40 45 50 40 60 40 Z" fill="url(#bgrad2)"></path>
+                <path class="siri-6" d="M60 45 C65 45 75 50 75 60 C75 70 65 75 60 75 C55 75 45 70 45 60 C45 50 55 45 60 45 Z" fill="url(#bgrad3)"></path>
+                <path class="siri-7" d="M60 50 C62 50 70 52 70 60 C70 68 62 70 60 70 C58 70 50 68 50 60 C50 52 58 50 60 50 Z" fill="url(#bgrad1)"></path>
+                <path class="siri-8" d="M60 55 C61 55 65 56 65 60 C65 64 61 65 60 65 C59 65 55 64 55 60 C55 56 59 55 60 55 Z" fill="url(#bgrad2)"></path>
             </svg>
         </div>
     </div>
 
     <script>
+        /**
+         * ============================================================================
+         * GLOBAL CONFIGURATION & STATE
+         * ============================================================================
+         */
         const RENDER_BACKEND_URL = "https://nikjoshi123-usd-voice-backend.hf.space";
         const WS_URL = "wss://nikjoshi123-usd-voice-backend.hf.space";
 
@@ -417,6 +1177,77 @@
         let currentLiveAssistantTag = null;
         let lastAssistantStreamingText = "";
 
+        // NATIVE BROWSER LIVE TRANSCRIPTION
+        let recognition = null;
+        let liveUserText = "";
+        let finalTranscript = ""; 
+
+        /**
+         * ============================================================================
+         * 10-SECOND SILENCE TIMEOUT ENGINE
+         * ============================================================================
+         */
+        window.silenceTimeout = null;
+
+        window.resetSilenceTimer = () => {
+            clearTimeout(window.silenceTimeout);
+            window.silenceTimeout = setTimeout(() => {
+                if (currentAgentState === 'listening' && isVoiceMode) {
+                    updateState('thinking');
+                    if (socket && socket.readyState === WebSocket.OPEN) {
+                        socket.send(JSON.stringify({
+                            type: 'text_input',
+                            text: "SYSTEM INSTRUCTION: The user has been completely silent for 10 seconds. Ask them politely: 'Are you still there? Please let me know if you have any questions.' Do not say anything else.",
+                            history: chatHistory,
+                            isVoiceMode: true
+                        }));
+                    }
+                }
+            }, 10000);
+        };
+
+        window.clearSilenceTimer = () => {
+            clearTimeout(window.silenceTimeout);
+        };
+
+        /**
+         * ============================================================================
+         * NATIVE BROWSER SPEECH RECOGNITION INIT
+         * ============================================================================
+         */
+        if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript + " ";
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+                
+                liveUserText = (finalTranscript + interimTranscript).trim();
+                
+                if (liveUserText) {
+                    const interimBox = document.getElementById('usd-interim-text');
+                    if (interimBox) {
+                        interimBox.innerText = "You: " + liveUserText;
+                        interimBox.style.color = "#D4AF37";
+                    }
+                }
+            };
+            recognition.onerror = (e) => {}; 
+        }
+
+        /**
+         * ============================================================================
+         * ACTION LINKS CONFIGURATION
+         * ============================================================================
+         */
         const usdLinks = {
             '[LINK_HOME]': { url: 'https://ultimatesmiledesign.com/', label: '🏠 Go to Home Page' },
             '[LINK_DENTISTS]': { url: 'https://ultimatesmiledesign.com/certified-dentists/', label: '📍 Find Nearest Dentist' },
@@ -428,6 +1259,11 @@
             '[LINK_CONNECT]': { url: 'https://ultimatesmiledesign.com/dentist-connect/', label: '🤝 Become Certified Dentist' }
         };
 
+        /**
+         * ============================================================================
+         * WINDOW LOAD EVENT
+         * ============================================================================
+         */
         window.onload = async () => {
             if (sessionStorage.getItem('usd_chat_active') === 'true') {
                 await openChat(true);
@@ -437,6 +1273,11 @@
         let lastScrollY = window.scrollY || 0;
         let scrollTimeout = null;
 
+        /**
+         * ============================================================================
+         * SCROLL LISTENER (PULSE EFFECT)
+         * ============================================================================
+         */
         window.addEventListener('scroll', () => {
             const currentScrollY = window.scrollY || document.documentElement.scrollTop;
             const tooltip = document.getElementById('usd-tooltip');
@@ -462,19 +1303,30 @@
             }, 150);
         });
 
+        /**
+         * ============================================================================
+         * TEXT SANITIZATION
+         * ============================================================================
+         */
         function cleanDisplayText(text = "") {
             let result = String(text || "");
             result = result.replace(new RegExp("\\[(hi|bn|ta|te|mr|gu|kn|ml|pa|or|en)-IN\\]", "gi"), "");
-            result = result.replace(new RegExp("", "g"), "");
+            result = result.replace(new RegExp("<!--[\\s\\S]*?-->", "g"), "");
             result = result.replace(new RegExp("\\s+", "g"), " ");
             return result.trim();
         }
 
+        /**
+         * ============================================================================
+         * UI STATE MANAGEMENT
+         * ============================================================================
+         */
         function updateState(newState, statusText = null) {
             currentAgentState = newState;
             const statusBox = document.getElementById('usd-status-box');
             const visualizer = document.getElementById('usd-visualizer');
             const interimBox = document.getElementById('usd-interim-text');
+            const voiceTrigger = document.getElementById('usd-voice-trigger-btn');
 
             if (statusBox) {
                 if (newState === 'connecting' || newState === 'off') {
@@ -486,32 +1338,44 @@
                 }
             }
 
-            if (newState === 'speaking') {
-                if (isVoiceMode) {
-                    visualizer.classList.add('active');
-                    if (interimBox && !interimBox.innerText.includes("You:") && !isReplyComplete) {
-                        interimBox.innerText = "Answering...";
-                        interimBox.style.color = "#ffffff";
-                    }
-                }
+            if (newState === 'speaking' || newState === 'listening') {
+                if (voiceTrigger) voiceTrigger.classList.add('is-listening');
+                if (isVoiceMode && visualizer) visualizer.classList.add('active');
             } else {
-                if (isVoiceMode) visualizer.classList.remove('active');
+                if (voiceTrigger) voiceTrigger.classList.remove('is-listening');
+                if (isVoiceMode && visualizer) visualizer.classList.remove('active');
             }
 
             if (newState === 'listening' && isVoiceMode) {
                 isMicSoftwareMuted = false;
-                if (interimBox && !interimBox.innerText.includes("You:")) {
-                    interimBox.innerText = "Listening...";
-                    interimBox.style.color = "#D4AF37";
+                if (window.resetSilenceTimer) window.resetSilenceTimer();
+
+                if (interimBox) {
+                    if (liveUserText) {
+                        interimBox.innerText = "You: " + liveUserText;
+                        interimBox.style.color = "#D4AF37";
+                    } else if (!interimBox.innerText.includes("You:")) {
+                        interimBox.innerText = "Listening...";
+                        interimBox.style.color = "#D4AF37";
+                    }
                 }
+            } else if (newState === 'speaking' && isVoiceMode) {
+                isMicSoftwareMuted = false;
+                if (window.clearSilenceTimer) window.clearSilenceTimer();
             } else {
                 isMicSoftwareMuted = true;
+                if (window.clearSilenceTimer) window.clearSilenceTimer();
             }
 
             if (newState === 'thinking') {
                 if (interimBox) {
-                    interimBox.innerText = "Answering...";
-                    interimBox.style.color = "#ffffff";
+                    if (liveUserText) {
+                        interimBox.innerText = "You: " + liveUserText + " ...";
+                        interimBox.style.color = "#ffffff";
+                    } else {
+                        interimBox.innerText = "Answering...";
+                        interimBox.style.color = "#ffffff";
+                    }
                 }
             }
 
@@ -520,6 +1384,11 @@
             }
         }
 
+        /**
+         * ============================================================================
+         * AUDIO CONTEXT INITIALIZATION
+         * ============================================================================
+         */
         async function initAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -529,12 +1398,22 @@
             }
         }
 
+        /**
+         * ============================================================================
+         * TRANSCRIPT LABEL SYNCHRONIZATION
+         * ============================================================================
+         */
         function syncTranscriptLabel() {
             const label = document.getElementById('usd-live-transcript-label');
             if (!label) return;
             label.innerText = isVoiceMode ? 'Assistant speaking' : 'Assistant typing';
         }
 
+        /**
+         * ============================================================================
+         * LOCAL KEYWORD & TAG DETECTION
+         * ============================================================================
+         */
         function detectLocalTagFromText(input = '') {
             const text = cleanDisplayText(String(input || "").toLowerCase());
 
@@ -578,8 +1457,11 @@
             return null;
         }
 
-        // ⚡ PERFECT MIDDLE GROUND VAD ⚡
-        // Extremely sensitive for listening (so it responds quickly), but strictly gated for interruptions.
+        /**
+         * ============================================================================
+         * VOICE ACTIVITY DETECTION (VAD) ENGINE
+         * ============================================================================
+         */
         function getHumanSpeechProfile(dataArray, timeDomainArray, sampleRate = 16000, fftSize = 512) {
             const binHz = sampleRate / fftSize;
             const idx = (hz) => Math.max(0, Math.min(dataArray.length - 1, Math.round(hz / binHz)));
@@ -615,25 +1497,29 @@
                 const centered = (timeDomainArray[i] - 128) / 128;
                 energy += centered * centered;
             }
+            
             const rms = Math.sqrt(energy / Math.max(1, timeDomainArray.length));
-
             const speechAvg = speechSum / Math.max(1, speechCount);
             const coreAvg = coreSum / Math.max(1, coreCount);
             const noiseAvg = noiseSum / Math.max(1, noiseCount);
             const speechRatio = speechSum / Math.max(1, (speechSum + noiseSum));
             const coreVsNoise = coreAvg / Math.max(1, noiseAvg);
 
-            // ⚡ Very sensitive threshold to effortlessly pick up your voice from 18 inches ⚡
             const isNearHumanSpeech =
-                rms > 0.010 &&            
+                rms > 0.008 &&            
                 speechAvg > 10 &&         
                 coreAvg > 12 &&
-                speechRatio > 0.50 &&     
-                coreVsNoise > 1.10;       
+                speechRatio > 0.55 &&     
+                coreVsNoise > 1.20;       
 
             return { rms, speechAvg, coreAvg, noiseAvg, speechRatio, coreVsNoise, isNearHumanSpeech };
         }
 
+        /**
+         * ============================================================================
+         * POPUP LINK RENDERER
+         * ============================================================================
+         */
         function renderPopupLink(tag) {
             const wrap = document.getElementById('usd-live-transcript-link-wrap');
             if (!wrap) return;
@@ -662,6 +1548,11 @@
             wrap.style.display = 'block';
         }
 
+        /**
+         * ============================================================================
+         * LIVE TRANSCRIPT RENDERER
+         * ============================================================================
+         */
         function updateLiveTranscript(text, tag = null, force = false) {
             const popup = document.getElementById('usd-live-transcript-popup');
             const popupText = document.getElementById('usd-live-transcript-text');
@@ -696,30 +1587,44 @@
                 const popup = document.getElementById('usd-live-transcript-popup');
                 const popupText = document.getElementById('usd-live-transcript-text');
                 const popupLinkWrap = document.getElementById('usd-live-transcript-link-wrap');
+                
                 if (popup) popup.style.display = 'none';
                 if (popupText) popupText.textContent = '';
+                
                 if (popupLinkWrap) {
                     popupLinkWrap.innerHTML = '';
                     popupLinkWrap.style.display = 'none';
                 }
+                
                 currentLiveAssistantText = "";
                 currentLiveAssistantTag = null;
                 lastAssistantStreamingText = "";
             }, delay);
         }
 
+        /**
+         * ============================================================================
+         * MESSAGE ELEMENT GENERATOR (MAPPED TO TARGET UI CLASS SELECTORS)
+         * ============================================================================
+         */
         function createMessageDiv(sender, text) {
             const msgDiv = document.createElement('div');
-            msgDiv.className = `msg msg-${sender}`;
+            if (sender === 'user') {
+                msgDiv.className = 'user_message';
+            } else if (sender === 'bot') {
+                msgDiv.className = 'bot_message';
+            } else {
+                msgDiv.className = 'msg msg-system';
+            }
 
-            const span = document.createElement('span');
-            span.className = 'usd-msg-text';
+            const p = document.createElement('p');
+            p.className = 'usd-msg-text';
 
-            if (sender === 'user') span.textContent = "You: " + text;
-            else if (sender === 'bot') span.textContent = "Assistant: " + text;
-            else span.textContent = text;
+            if (sender === 'user') p.textContent = "You: " + text;
+            else if (sender === 'bot') p.textContent = "Assistant: " + text;
+            else p.textContent = text;
 
-            msgDiv.appendChild(span);
+            msgDiv.appendChild(p);
             return msgDiv;
         }
 
@@ -749,6 +1654,11 @@
             saveHistory();
         }
 
+        /**
+         * ============================================================================
+         * AUDIO QUEUE COMPLETION HANDLER
+         * ============================================================================
+         */
         function checkBotFinishedSpeaking() {
             if (isReplyComplete && audioChunkQueue.length === 0 && activeSources.length === 0) {
                 isReplyComplete = false;
@@ -769,6 +1679,11 @@
             }
         }
 
+        /**
+         * ============================================================================
+         * BASE64 AUDIO STREAM DECODER
+         * ============================================================================
+         */
         async function playAudioChunk(base64) {
             if (!base64) return;
             updateState('speaking');
@@ -793,6 +1708,7 @@
                 source.start(nextPlayTime);
                 nextPlayTime += audioBuffer.duration; 
                 
+                window.activeAudioSourceNode = source;
                 activeSources.push(source);
                 
                 source.onended = () => {
@@ -825,50 +1741,77 @@
             }, 3000);
         }
 
+        /**
+         * ============================================================================
+         * INTERRUPTION CONTROLLER (BARGE-IN)
+         * ============================================================================
+         */
         function interruptBot() {
+            if (!isVoiceMode) return;
+            
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                try {
+                    socket.send(JSON.stringify({ type: 'user_interrupt_barge_in' }));
+                } catch (e) {}
+            }
+            
             audioChunkQueue = [];
             isReplyComplete = false; 
             nextPlayTime = 0; 
+            interruptRestartHoldUntil = performance.now() + 500; 
             
-            interruptRestartHoldUntil = performance.now() + 180;
+            liveUserText = "";
+            finalTranscript = "";
+            if (recognition) { try { recognition.abort(); } catch(e) {} }
 
-            if (socket && socket.readyState === WebSocket.OPEN) {
+            if (window.activeAudioSourceNode) {
                 try {
-                    socket.send(JSON.stringify({ type: 'interrupt' }));
-                } catch (e) {}
+                    window.activeAudioSourceNode.stop();
+                    window.activeAudioSourceNode.disconnect();
+                } catch(e) {}
             }
 
             activeSources.forEach(s => {
-                try { s.stop(); } catch(e) {}
+                try { s.stop(); s.disconnect(); } catch(e) {}
             });
             activeSources = [];
+            
             hideLiveTranscript(0);
             activeBotMessageDiv = null;
             activeBotTextSpan = null;
             lastAssistantStreamingText = "";
+            
+            updateState('listening');
         }
 
+        /**
+         * ============================================================================
+         * MODE TOGGLE UI
+         * ============================================================================
+         */
         function toggleChatMode() {
             isVoiceMode = !isVoiceMode;
             const toggleBtn = document.getElementById('usd-mode-toggle');
-            const visualizer = document.getElementById('usd-visualizer');
             const textControls = document.getElementById('usd-input-container');
+            const voiceFooter = document.getElementById('usd-voice-controls-footer');
             const micText = document.getElementById('usd-interim-text');
             const liveTranscript = document.getElementById('usd-live-transcript-popup');
+            const inputInner = document.querySelector('.input_box_and_icon_main');
             
             if (isVoiceMode) {
-                toggleBtn.innerText = "💬 Text";
-                visualizer.style.display = "flex";
-                textControls.style.display = "none";
-                micText.style.display = "block";
+                if (toggleBtn) toggleBtn.innerText = "💬 Text";
+                if (textControls) textControls.style.display = "none";
+                if (voiceFooter) voiceFooter.style.display = "flex";
+                if (micText) micText.style.display = "block";
                 if (liveTranscript) liveTranscript.style.display = "none";
                 syncTranscriptLabel();
                 updateState('listening');
             } else {
-                toggleBtn.innerText = "🎙️ Voice";
-                visualizer.style.display = "none";
-                textControls.style.display = "flex";
-                micText.style.display = "none";
+                if (toggleBtn) toggleBtn.innerText = "🎙️ Voice";
+                if (textControls) textControls.style.display = "block";
+                if (inputInner) inputInner.style.display = "flex";
+                if (voiceFooter) voiceFooter.style.display = "none";
+                if (micText) micText.style.display = "none";
                 if (liveTranscript) liveTranscript.style.display = "none";
                 interruptBot();
                 syncTranscriptLabel();
@@ -877,6 +1820,11 @@
             sessionStorage.setItem('usd_is_voice_mode', isVoiceMode.toString());
         }
 
+        /**
+         * ============================================================================
+         * PRIMARY CHAT INITIATOR
+         * ============================================================================
+         */
         async function openChat(isRestore = false) {
             initAudio();
             interruptRestartHoldUntil = 0;
@@ -885,14 +1833,22 @@
             const bubble = document.getElementById('usd-bubble');
             
             if (currentAgentState === 'off' || isRestore) {
-                bubble.style.display = 'none'; 
-                container.style.display = 'flex';
-                tooltip.style.opacity = '0'; 
-                tooltip.style.pointerEvents = 'none';
+                if (bubble) {
+                    bubble.style.display = 'none'; 
+                    bubble.classList.add('hidden');
+                }
+                if (container) {
+                    container.style.display = 'flex';
+                    container.classList.add('active');
+                }
+                if (tooltip) {
+                    tooltip.style.opacity = '0'; 
+                    tooltip.style.pointerEvents = 'none';
+                }
                 
-                document.getElementById('usd-input-container').style.display = 'flex';
+                document.getElementById('usd-input-container').style.display = 'none';
+                document.getElementById('usd-voice-controls-footer').style.display = 'flex';
                 document.getElementById('usd-inline-rating').style.display = 'none';
-                document.getElementById('usd-mode-toggle').style.display = 'block';
                 hideLiveTranscript(0);
                 syncTranscriptLabel();
                 
@@ -900,10 +1856,18 @@
                     chatHistory = JSON.parse(sessionStorage.getItem('usd_chat_history') || '[]');
                     isVoiceMode = sessionStorage.getItem('usd_is_voice_mode') !== 'false';
                     
-                    const toggleBtn = document.getElementById('usd-mode-toggle');
-                    toggleBtn.innerText = isVoiceMode ? "💬 Text" : "🎙️ Voice";
-                    if(isVoiceMode) document.getElementById('usd-visualizer').style.display = 'flex';
-                    else document.getElementById('usd-visualizer').style.display = 'none';
+                    const textControls = document.getElementById('usd-input-container');
+                    const voiceFooter = document.getElementById('usd-voice-controls-footer');
+                    const inputInner = document.querySelector('.input_box_and_icon_main');
+
+                    if (isVoiceMode) {
+                        if (textControls) textControls.style.display = 'none';
+                        if (voiceFooter) voiceFooter.style.display = 'flex';
+                    } else {
+                        if (textControls) textControls.style.display = 'block';
+                        if (inputInner) inputInner.style.display = 'flex';
+                        if (voiceFooter) voiceFooter.style.display = 'none';
+                    }
                     syncTranscriptLabel();
                     
                     document.getElementById('usd-chat-log').innerHTML = ""; 
@@ -920,7 +1884,6 @@
                     updateState('thinking');
                     await startWebSocket();
                 } else {
-                    if(isVoiceMode) document.getElementById('usd-visualizer').style.display = 'flex';
                     document.getElementById('usd-chat-log').innerHTML = ""; 
                     chatHistory = [];
                     activeBotMessageDiv = null;
@@ -939,6 +1902,11 @@
             }
         }
 
+        /**
+         * ============================================================================
+         * WEBSOCKET & VAD CONTROLLER CORE
+         * ============================================================================
+         */
         async function startWebSocket() {
             try {
                 socket = new WebSocket(WS_URL);
@@ -986,7 +1954,9 @@
                     let shortPauseTimer = null; 
                     let longPauseTimer = null; 
                     let maxRecordingTimer = null;
-                    let consecutiveLoudFrames = 0; 
+                    
+                    let consecutiveVoiceFrames = 0; 
+                    let consecutiveInterruptFrames = 0; 
 
                     processor.onaudioprocess = (e) => {
                         if (isMicSoftwareMuted) return;
@@ -1026,51 +1996,56 @@
 
                         const speechProfile = getHumanSpeechProfile(
                             dataArray,
-                            timeDataArray,
+                            timeDomainArray,
                             streamCtx.sampleRate || 16000,
                             analyser.fftSize || 512
                         );
 
                         if (isSpeakingNow) {
-                            // ⚡ STRICTION ON INTERRUPTION: Requires significantly louder/nearer voice for solid 300ms ⚡
-                            // Because it takes 10 consecutive frames, brief background noises or single words won't interrupt her!
-                            if (speechProfile.isNearHumanSpeech && humanVolume > 35) { 
-                                consecutiveLoudFrames++;
-                                if (consecutiveLoudFrames >= 10) { 
-                                    consecutiveLoudFrames = 0;
-
-                                    clearTimeout(shortPauseTimer);
-                                    clearTimeout(longPauseTimer);
-                                    clearTimeout(maxRecordingTimer);
-                                    shortPauseTimer = null;
-                                    longPauseTimer = null;
-                                    maxRecordingTimer = null;
-
+                            const isForegroundVoice = speechProfile.isNearHumanSpeech && 
+                                                      humanVolume > 15 && 
+                                                      speechProfile.rms > 0.01 &&
+                                                      speechProfile.coreVsNoise > 1.5 &&
+                                                      speechProfile.speechRatio > 0.60;
+                                                      
+                            if (isForegroundVoice) {
+                                consecutiveInterruptFrames++;
+                                if (consecutiveInterruptFrames > 50) {
                                     interruptBot();
-                                    updateState('listening');
-                                    isRecording = false;
+                                    consecutiveInterruptFrames = 0;
                                 }
                             } else {
-                                consecutiveLoudFrames = 0; 
+                                consecutiveInterruptFrames = Math.max(0, consecutiveInterruptFrames - 1);
                             }
                             requestAnimationFrame(detectVoice);
                             return;
                         }
 
                         if (currentAgentState === 'listening' && isVoiceMode) {
-                            const inRestartHold = performance.now() < interruptRestartHoldUntil;
+                            if (humanVolume > 10 && window.resetSilenceTimer) {
+                                window.resetSilenceTimer();
+                            }
 
-                            const canStartRecording = inRestartHold
-                                ? (
-                                    speechProfile.isNearHumanSpeech &&
-                                    humanVolume > 40 &&
-                                    speechProfile.speechRatio > 0.65
-                                )
-                                : (speechProfile.isNearHumanSpeech && humanVolume > 10); // ⚡ Fast-reacting listening threshold
+                            const volumeIsGood = humanVolume > 15; 
+                            const canStartRecording = speechProfile.isNearHumanSpeech && volumeIsGood; 
 
-                            if (canStartRecording) { 
+                            if (canStartRecording) {
+                                consecutiveVoiceFrames++;
+                            } else {
+                                consecutiveVoiceFrames = 0;
+                            }
+
+                            if (consecutiveVoiceFrames > 8) { 
                                 if (!isRecording) {
                                     isRecording = true;
+                                    liveUserText = ""; 
+                                    finalTranscript = ""; 
+                                    if (recognition) {
+                                        try { 
+                                            recognition.abort(); 
+                                            setTimeout(() => recognition.start(), 50); 
+                                        } catch(e) {}
+                                    }
                                     updateState('listening'); 
                                     
                                     if (socket.readyState === WebSocket.OPEN) {
@@ -1080,12 +2055,23 @@
                                     maxRecordingTimer = setTimeout(() => {
                                         if (isRecording) {
                                             isRecording = false;
+                                            if (recognition) { try { recognition.stop(); } catch(e) {} }
                                             updateState('thinking');
+                                            
                                             if (socket.readyState === WebSocket.OPEN) {
-                                                socket.send(JSON.stringify({ type: 'process_final', history: chatHistory, isVoiceMode: isVoiceMode }));
+                                                socket.send(JSON.stringify({ 
+                                                    type: 'process_final', 
+                                                    history: chatHistory, 
+                                                    isVoiceMode: isVoiceMode,
+                                                    nativeTranscript: liveUserText 
+                                                }));
                                             }
+                                            
+                                            liveUserText = ""; finalTranscript = "";
+                                            const interimBox = document.getElementById('usd-interim-text');
+                                            if (interimBox) interimBox.innerText = "Answering...";
                                         }
-                                    }, 14000); 
+                                    }, 20000); 
                                 }
                                 
                                 clearTimeout(shortPauseTimer);
@@ -1095,19 +2081,29 @@
                                     if (isRecording && socket.readyState === WebSocket.OPEN) {
                                         socket.send(JSON.stringify({ type: 'process_interim' }));
                                     }
-                                }, 600); 
+                                }, 800); 
 
-                                // ⚡ FAST TRANSITION: 800ms to immediately switch to "Answering..." when you stop talking
                                 longPauseTimer = setTimeout(() => {
                                     if (isRecording) {
                                         isRecording = false;
+                                        if (recognition) { try { recognition.stop(); } catch(e) {} }
                                         clearTimeout(maxRecordingTimer);
                                         updateState('thinking');
+                                        
                                         if (socket.readyState === WebSocket.OPEN) {
-                                            socket.send(JSON.stringify({ type: 'process_final', history: chatHistory, isVoiceMode: isVoiceMode }));
+                                            socket.send(JSON.stringify({ 
+                                                type: 'process_final', 
+                                                history: chatHistory, 
+                                                isVoiceMode: isVoiceMode,
+                                                nativeTranscript: liveUserText 
+                                            }));
                                         }
+                                        
+                                        liveUserText = ""; finalTranscript = "";
+                                        const interimBox = document.getElementById('usd-interim-text');
+                                        if (interimBox) interimBox.innerText = "Answering...";
                                     }
-                                }, 800); 
+                                }, 2500); 
                             }
                         }
                         requestAnimationFrame(detectVoice);
@@ -1119,21 +2115,63 @@
                 socket.onmessage = async (event) => {
                     const data = JSON.parse(event.data);
                     
-                    if (data.type === 'idle' || data.type === 'error') {
+                    if (data.type === 'bot_interrupted') {
+                        audioChunkQueue = [];
+                        if (window.activeAudioSourceNode) {
+                            try { window.activeAudioSourceNode.stop(); window.activeAudioSourceNode.disconnect(); } catch (e) {}
+                            window.activeAudioSourceNode = null;
+                        }
+                        activeSources.forEach(s => {
+                            try { s.stop(); s.disconnect(); } catch(e) {}
+                        });
+                        activeSources = [];
+                        isAudioPlaying = false;
+                        isReplyComplete = false;
+                        nextPlayTime = 0;
+                        
+                        liveUserText = ""; finalTranscript = ""; activeBotMessageDiv = null; activeBotTextSpan = null; lastAssistantStreamingText = "";
+                        const interimBox = document.getElementById('usd-interim-text');
+                        if (interimBox) { interimBox.innerText = "Listening..."; interimBox.style.color = "#D4AF37"; }
+                        
+                        updateState('listening');
+                        return; 
+                    }
+                    else if (data.type === 'idle' || data.type === 'error') {
                         hideLiveTranscript(0);
+                        liveUserText = ""; 
+                        finalTranscript = ""; 
+                        if (recognition) { try { recognition.abort(); } catch(e) {} }
+                        
+                        const interimBox = document.getElementById('usd-interim-text');
+                        if (interimBox) interimBox.innerText = "";
+                        
                         updateState('listening');
                     }
                     else if (data.type === 'user_spoken_text') {
                         const cleanUserText = cleanDisplayText(data.text || "");
+                        
                         if (cleanUserText) {
-                            logMessage('user', cleanUserText);
-                            addUserHistoryIfNew(cleanUserText);
+                            const last = chatHistory[chatHistory.length - 1];
+                            const alreadyInHistory = last && last.role === 'user' && last.parts && last.parts[0] && cleanUserText === last.parts[0].text;
+                            
+                            if (!alreadyInHistory) {
+                                logMessage('user', cleanUserText);
+                                addUserHistoryIfNew(cleanUserText);
+                            }
+                            
+                            liveUserText = "";
+                            finalTranscript = ""; 
+                            const interimBox = document.getElementById('usd-interim-text');
+                            if (interimBox && interimBox.innerText.includes("You:")) {
+                                interimBox.innerText = "Answering...";
+                                interimBox.style.color = "#ffffff";
+                            }
                         }
                     }
                     else if (data.type === 'interim_transcript') {
                         const interimBox = document.getElementById('usd-interim-text');
-                        if (interimBox) {
-                            interimBox.innerText = "You: " + data.text;
+                        if (interimBox && data.text) {
+                            interimBox.innerText = "You: " + data.text + " ...";
                             interimBox.style.color = "#D4AF37";
                         }
                     }
@@ -1171,8 +2209,10 @@
                     else if (data.type === 'reply_complete') {
                         isReplyComplete = true; 
                         
+                        liveUserText = ""; 
+                        finalTranscript = "";
                         const interimBox = document.getElementById('usd-interim-text');
-                        if (interimBox && interimBox.innerText === "Answering...") {
+                        if (interimBox) {
                             interimBox.innerText = "";
                         }
 
@@ -1180,13 +2220,7 @@
                         activeBotMessageDiv = null;
                         activeBotTextSpan = null;
 
-                        const finalText = cleanDisplayText(
-                            data.botText ||
-                            lastAssistantStreamingText ||
-                            currentLiveAssistantText ||
-                            ""
-                        ).trim();
-
+                        const finalText = cleanDisplayText(data.botText || "").trim();
                         const finalTag = data.tag || detectLocalTagFromText(finalText) || detectLocalTagFromText(data.userText || "");
 
                         if (finalText) {
@@ -1205,8 +2239,12 @@
                             }
                             
                             updateLiveTranscript(finalText, finalTag, true);
+                        } else if (botTarget) {
+                            botTarget.remove();
                         }
 
+                        lastAssistantStreamingText = "";
+                        currentLiveAssistantText = "";
                         activeTag = finalTag;
                         
                         const finalBotTarget = botTarget || lastBotMessageDiv;
@@ -1236,6 +2274,11 @@
             }
         }
 
+        /**
+         * ============================================================================
+         * CALL TERMINATION FLOW
+         * ============================================================================
+         */
         function closeChatBtnClicked() {
             document.getElementById('usd-end-confirm-overlay').style.display = 'flex';
         }
@@ -1280,18 +2323,31 @@
             sessionStorage.removeItem('usd_chat_active');
             sessionStorage.removeItem('usd_chat_history');
             
+            const bubble = document.getElementById('usd-bubble');
+            const container = document.getElementById('usd-chat-container');
+
             if (showRating) {
                 document.getElementById('usd-input-container').style.display = 'none';
-                document.getElementById('usd-mode-toggle').style.display = 'none';
-                document.getElementById('usd-visualizer').style.display = 'none';
+                document.getElementById('usd-voice-controls-footer').style.display = 'none';
                 document.getElementById('usd-inline-rating').style.display = 'block';
                 logMessage('system', 'The chat has ended. Please rate your experience below.');
             } else {
-                document.getElementById('usd-chat-container').style.display = 'none';
-                document.getElementById('usd-bubble').style.display = 'flex'; 
+                if (container) {
+                    container.style.display = 'none';
+                    container.classList.remove('active');
+                }
+                if (bubble) {
+                    bubble.style.display = 'flex'; 
+                    bubble.classList.remove('hidden');
+                }
             }
         }
 
+        /**
+         * ============================================================================
+         * POST-CALL RATING & TRANSCRIPT DELIVERY
+         * ============================================================================
+         */
         async function submitRating(stars) {
             const starElements = document.querySelectorAll('.usd-star');
             starElements.forEach((s, index) => {
@@ -1302,8 +2358,10 @@
 
             try {
                 let transcript = "No chat history recorded.";
-                if (chatHistory && chatHistory.length > 0) {
-                    transcript = chatHistory.map(turn => `${turn.role === 'user' ? 'User' : 'Agent'}: ${turn.parts[0].text}`).join('\n\n');
+                
+                const allMessages = document.querySelectorAll('#usd-chat-log .usd-msg-text');
+                if (allMessages.length > 0) {
+                    transcript = Array.from(allMessages).map(msg => msg.innerText).join('\n\n');
                 }
 
                 await fetch('https://api.web3forms.com/submit', {
@@ -1311,7 +2369,7 @@
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                     body: JSON.stringify({ 
                         access_key: "c1a373a7-407e-47f4-8403-be692c2f3eff", 
-                        subject: `🌟 New USD Voice Agent Rating: ${stars}/5 Stars`, 
+                        subject: `New USD Voice Agent Rating: ${stars}/5 Stars`, 
                         from_name: "Ultimate Smile Voice Agent", 
                         email: "noreply@ultimatesmiledesign.com",
                         message: `Transcript:\n\n${transcript}` 
@@ -1322,6 +2380,11 @@
             setTimeout(() => { closeChat(false); }, 3000);
         }
 
+        /**
+         * ============================================================================
+         * MANUAL TEXT MESSAGE INJECTION
+         * ============================================================================
+         */
         async function submitTextMessage() {
             const inputEl = document.getElementById('usd-text-input');
             const userText = cleanDisplayText(inputEl.value.trim());
@@ -1352,50 +2415,7 @@
             }
         }
 
-       async function handleLinkClick(tag) {
-            const linkInfo = usdLinks[tag];
-            if (!linkInfo) return;
-            
-            logMessage('bot', "Redirecting you now...");
-            chatHistory.push({ role: "model", parts: [{ text: "Redirecting you now..." }] });
-            if (chatHistory.length > 6) chatHistory = chatHistory.slice(-6);
-            saveHistory();
-
-            window.open(linkInfo.url, '_blank');
-            
-            updateState('listening');
-        }
-        
-        function logMessage(sender, text, tag = null) {
-            const log = document.getElementById('usd-chat-log');
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `msg msg-${sender}`;
-            
-            const span = document.createElement('span');
-            span.className = 'usd-msg-text';
-            if (sender === 'user') span.innerText = "You: " + text;
-            else if (sender === 'bot') span.innerText = "Assistant: " + text;
-            else span.innerText = text; 
-            
-            msgDiv.appendChild(span);
-
-            if (tag && usdLinks[tag]) {
-                const btn = document.createElement('button');
-                btn.className = 'usd-link-card';
-                btn.innerText = usdLinks[tag].label;
-                btn.onclick = () => handleLinkClick(tag);
-                msgDiv.appendChild(btn);
-            }
-
-            log.appendChild(msgDiv);
-            log.scrollTop = log.scrollHeight;
-
-            if (sender === 'bot') {
-                lastBotMessageDiv = msgDiv;
-            }
-
-            return msgDiv;
-        }
-    </script>
-</body>
-</html>
+        /**
+         * ============================================================================
+         * LINK REDIRECTION HANDLER
+         * ==========================================
