@@ -140,13 +140,18 @@
         }
 
         .chat_box_icon_inside {
-            width: 80px;
-            height: 80px;
+            width: 96px;
+            height: 96px;
         }
 
         .chat_box_inside_bot_icon {
-            width: 80px;
-            height: 80px;
+            width: 96px;
+            height: 96px;
+        }
+
+        .chat_box_icon_inside > img {
+            width: 100%;
+            height: 100%;
         }
 
         .chat_main_container {
@@ -537,48 +542,59 @@
 
         /**
          * ============================================================================
-         * SIRI ORB ANIMATIONS
+         * PREMIUM GLASSY SIRI ORB SPECIFICATIONS
          * ============================================================================
          */
-        @keyframes siriRotateCW {
+        .fluid-ribbon {
+            transform-origin: 50px 50px;
+            transition: transform 0.4s ease-out;
+        }
+
+        /* Continuous ambient morph animations */
+        @keyframes rotateCW {
             0% { transform: rotate(0deg) scale(1); }
             50% { transform: rotate(180deg) scale(1.05); }
             100% { transform: rotate(360deg) scale(1); }
         }
 
-        @keyframes siriRotateCCW {
+        @keyframes rotateCCW {
             0% { transform: rotate(360deg) scale(1); }
-            50% { transform: rotate(180deg) scale(1.02); }
+            50% { transform: rotate(180deg) scale(0.95); }
             100% { transform: rotate(0deg) scale(1); }
         }
 
-        @keyframes siriPulseBase {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.08); }
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); opacity: 0.75; }
+            50% { transform: scale(1.15); opacity: 1; }
         }
 
-        .voice_chat_bot_icon_container svg path,
-        .chat_box_icon_inside svg path {
-            transform-origin: 38px 38px;
-        }
+        /* Default gently drifting state */
+        .fluid-ribbon.r1 { animation: rotateCW 12s linear infinite; }
+        .fluid-ribbon.r2 { animation: rotateCCW 16s linear infinite; }
+        .fluid-ribbon.r3 { animation: rotateCW 14s ease-in-out infinite; }
+        .fluid-ribbon.r4 { animation: rotateCCW 18s ease-in-out infinite; }
+        .orb-core { animation: pulseGlow 4s ease-in-out infinite; transform-origin: 50px 50px; }
 
-        /* Sizing context for the 76x76 bubble orbs */
-        .voice_chat_bot_icon_container svg path {
-            transform-origin: 38px 38px;
-        }
-        /* Sizing context for the 80x80 header orbs */
-        .chat_box_icon_inside svg path {
-            transform-origin: 40px 40px;
-        }
+        /* Dynamic SPEAKING activity speeds: morphs dynamically like a voice speaking */
+        .usd-speaking .fluid-ribbon.r1 { animation: rotateCW 2.2s linear infinite !important; }
+        .usd-speaking .fluid-ribbon.r2 { animation: rotateCCW 2.8s linear infinite !important; }
+        .usd-speaking .fluid-ribbon.r3 { animation: rotateCW 2.5s ease-in-out infinite !important; }
+        .usd-speaking .fluid-ribbon.r4 { animation: rotateCCW 3.2s ease-in-out infinite !important; }
+        .usd-speaking .orb-core { animation: pulseGlow 1s ease-in-out infinite !important; }
 
-        .voice_chat_bot_icon_container svg .siri-1, .chat_box_icon_inside svg .siri-1 { animation: siriRotateCW 4s linear infinite; }
-        .voice_chat_bot_icon_container svg .siri-2, .chat_box_icon_inside svg .siri-2 { animation: siriRotateCCW 6s linear infinite; }
-        .voice_chat_bot_icon_container svg .siri-3, .chat_box_icon_inside svg .siri-3 { animation: siriRotateCW 5s ease-in-out infinite; }
-        .voice_chat_bot_icon_container svg .siri-4, .chat_box_icon_inside svg .siri-4 { animation: siriRotateCCW 7s linear infinite; }
-        .voice_chat_bot_icon_container svg .siri-5, .chat_box_icon_inside svg .siri-5 { animation: siriRotateCW 4.5s ease-in-out infinite; }
-        .voice_chat_bot_icon_container svg .siri-6, .chat_box_icon_inside svg .siri-6 { animation: siriRotateCCW 5.5s linear infinite; }
-        .voice_chat_bot_icon_container svg .siri-7, .chat_box_icon_inside svg .siri-7 { animation: siriPulseBase 3s ease-in-out infinite; }
-        .voice_chat_bot_icon_container svg .siri-8, .chat_box_icon_inside svg .siri-8 { animation: siriRotateCCW 7.5s linear infinite; }
+        /* Slow computing state: gentle signifying wave computation */
+        .usd-thinking .fluid-ribbon.r1 { animation: rotateCW 7s linear infinite !important; }
+        .usd-thinking .fluid-ribbon.r2 { animation: rotateCCW 9s linear infinite !important; }
+        .usd-thinking .fluid-ribbon.r3 { animation: rotateCW 8s ease-in-out infinite !important; }
+        .usd-thinking .fluid-ribbon.r4 { animation: rotateCCW 10s ease-in-out infinite !important; }
+        .usd-thinking .orb-core { animation: pulseGlow 1.8s ease-in-out infinite !important; }
+
+        /* Passive listening state */
+        .usd-listening .fluid-ribbon.r1 { animation: rotateCW 5s linear infinite !important; }
+        .usd-listening .fluid-ribbon.r2 { animation: rotateCCW 6.5s linear infinite !important; }
+        .usd-listening .fluid-ribbon.r3 { animation: rotateCW 5.8s ease-in-out infinite !important; }
+        .usd-listening .fluid-ribbon.r4 { animation: rotateCCW 7.2s ease-in-out infinite !important; }
+        .usd-listening .orb-core { animation: pulseGlow 2.5s ease-in-out infinite !important; }
     </style>
 </head>
 <body>
@@ -603,6 +619,7 @@
                 </div>
             </div>
 
+            <!-- State classes (usd-speaking, usd-listening, usd-thinking) are dynamically toggled on usd-chat-inner-wrap to trigger organic voice morph animations -->
             <div id="usd-chat-inner-wrap" style="height: 100%; display: flex; flex-direction: column; position: relative; z-index: 10;">
                 
                 <!-- HEADER -->
@@ -613,32 +630,75 @@
                     </div>
                 </div>
 
-                <!-- TOP ANIMATED ORB VISUALIZER -->
+                <!-- TOP ANIMATED GLASSY GOLDEN ORB (EXACT SPECIFICATIONS OF ATTACHED IMAGE) -->
                 <div class="chat_box_icon_inside_main">
                     <div class="chat_box_icon_inside">
-                        <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" class="chat_box_inside_bot_icon">
+                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="chat_box_inside_bot_icon" id="usd-glass-orb-svg">
                             <defs>
-                                <radialGradient id="grad1" cx="50%" cy="50%" r="50%">
-                                    <stop offset="0%" stop-color="#FFD700" stop-opacity="0.85"/>
-                                    <stop offset="100%" stop-color="#B8860B" stop-opacity="0"/>
+                                <!-- Spherical base background highlight -->
+                                <radialGradient id="orbBg" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" stop-color="#111111" />
+                                    <stop offset="65%" stop-color="#1b1b1b" />
+                                    <stop offset="85%" stop-color="#101010" />
+                                    <stop offset="100%" stop-color="#05050a" />
                                 </radialGradient>
-                                <radialGradient id="grad2" cx="50%" cy="50%" r="50%">
-                                    <stop offset="0%" stop-color="#D4AF37" stop-opacity="0.85"/>
-                                    <stop offset="100%" stop-color="#8B6508" stop-opacity="0"/>
+                                
+                                <!-- Golden reflective bounding gold edge -->
+                                <linearGradient id="goldRim" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="rgba(212, 175, 55, 0.55)" />
+                                    <stop offset="50%" stop-color="rgba(255, 248, 220, 0.75)" />
+                                    <stop offset="100%" stop-color="rgba(170, 128, 60, 0.55)" />
+                                </linearGradient>
+
+                                <!-- Translucent inner ribbons matching image layers -->
+                                <linearGradient id="ribbonGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="rgba(212, 175, 55, 0.65)" />
+                                    <stop offset="100%" stop-color="rgba(170, 128, 60, 0.05)" />
+                                </linearGradient>
+                                
+                                <linearGradient id="ribbonGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stop-color="rgba(251, 239, 172, 0.75)" />
+                                    <stop offset="100%" stop-color="rgba(196, 157, 71, 0.05)" />
+                                </linearGradient>
+                                
+                                <radialGradient id="coreGlow" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
+                                    <stop offset="25%" stop-color="#fbefac" stop-opacity="0.8" />
+                                    <stop offset="60%" stop-color="#D4AF37" stop-opacity="0.15" />
+                                    <stop offset="100%" stop-color="#D4AF37" stop-opacity="0" />
                                 </radialGradient>
-                                <radialGradient id="grad3" cx="50%" cy="50%" r="50%">
-                                    <stop offset="0%" stop-color="#FFF8DC" stop-opacity="0.85"/>
-                                    <stop offset="100%" stop-color="#D4AF37" stop-opacity="0"/>
-                                </radialGradient>
+
+                                <!-- Specular reflection path gradient -->
+                                <linearGradient id="reflectGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stop-color="#ffffff" stop-opacity="0.12" />
+                                    <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+                                </linearGradient>
                             </defs>
-                            <path class="siri-1" d="M40 13 C53 13 67 27 67 40 C67 53 53 67 40 67 C27 67 13 53 13 40 C13 27 27 13 40 13 Z" fill="url(#grad1)"></path>
-                            <path class="siri-2" d="M40 17 C50 17 63 30 63 40 C63 50 50 63 40 63 C30 63 17 50 17 40 C17 30 30 17 40 17 Z" fill="url(#grad2)"></path>
-                            <path class="siri-3" d="M40 20 C47 20 60 33 60 40 C60 47 47 60 40 60 C33 60 20 47 20 40 C20 33 33 20 40 20 Z" fill="url(#grad3)"></path>
-                            <path class="siri-4" d="M40 23 C43 23 57 37 57 40 C57 43 43 57 40 57 C37 57 23 43 23 40 C23 37 37 23 40 23 Z" fill="url(#grad1)"></path>
-                            <path class="siri-5" d="M40 27 C47 27 53 30 53 40 C53 50 47 53 40 53 C33 53 27 50 27 40 C27 30 33 27 40 27 Z" fill="url(#grad2)"></path>
-                            <path class="siri-6" d="M40 30 C43 30 50 33 50 40 C50 47 43 50 40 50 C37 50 30 47 30 40 C30 33 37 30 40 30 Z" fill="url(#grad3)"></path>
-                            <path class="siri-7" d="M40 33 C41 33 47 35 47 40 C47 45 41 47 40 47 C39 47 33 45 33 40 C33 35 39 33 40 33 Z" fill="url(#grad1)"></path>
-                            <path class="siri-8" d="M40 37 C41 37 43 37 43 40 C43 43 41 43 40 43 C39 43 37 43 37 40 C37 37 39 37 40 37 Z" fill="url(#grad2)"></path>
+
+                            <!-- Glass sphere bounding structure -->
+                            <circle cx="50" cy="50" r="47" fill="url(#orbBg)" stroke="url(#goldRim)" stroke-width="0.8" />
+
+                            <!-- Concentric morphing organic shapes inside (screend layout) -->
+                            <g id="fluid-group">
+                                <!-- Amber Ribbon 1 (Top loop) -->
+                                <path class="fluid-ribbon r1" d="M18 40 C20 22, 60 12, 80 25 C65 37, 37 37, 18 40 Z" fill="url(#ribbonGrad1)" style="mix-blend-mode: screen;" />
+                                
+                                <!-- Amber Ribbon 2 (Left loop) -->
+                                <path class="fluid-ribbon r2" d="M15 57 C12 40, 42 45, 57 65 C37 70, 22 67, 15 57 Z" fill="url(#ribbonGrad2)" style="mix-blend-mode: screen;" />
+
+                                <!-- Silver Ribbon 3 (Crossing overlay) -->
+                                <path class="fluid-ribbon r3" d="M35 80 C55 65, 85 55, 82 37 C72 57, 52 72, 35 80 Z" fill="rgba(255,255,255,0.35)" style="mix-blend-mode: screen;" />
+
+                                <!-- Dense Ribbon 4 (Offset helper) -->
+                                <path class="fluid-ribbon r4" d="M30 20 C50 30, 70 50, 55 75 C45 60, 35 40, 30 20 Z" fill="url(#ribbonGrad1)" style="mix-blend-mode: screen;" />
+                            </g>
+
+                            <!-- White Hot Center Core Glow -->
+                            <circle class="orb-core" cx="50" cy="50" r="22" fill="url(#coreGlow)" style="mix-blend-mode: screen;" />
+
+                            <!-- Specification specular reflection overlay -->
+                            <circle cx="50" cy="50" r="47" fill="url(#reflectGrad)" pointer-events="none" />
+                            <path d="M20 11 A32 32 0 0 1 80 11 A37 37 0 0 0 20 11 Z" fill="rgba(255,255,255,0.06)" pointer-events="none" />
                         </svg>
                     </div>
                 </div>
@@ -658,7 +718,7 @@
                         </svg>
                     </div>
 
-                    <!-- Custom Concentric Golden Mic Button (First Image Specification) -->
+                    <!-- Concentric Golden Mic Button -->
                     <div class="voice_icon_main is-listening" id="usd-voice-trigger-btn">
                         <svg viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg" class="voice_animation_icon">
                             <defs>
@@ -734,7 +794,7 @@
             </div>
         </div>
         
-        <!-- FLOATING TRIGGER BUBBLE -->
+        <!-- FLOATING TRIGGER BUBBLE (STYLISH COMPACT GLASS ORB) -->
         <div id="usd-bubble" class="voice_chat_bot_icon_container" onclick="openChat(false)">
             <svg viewBox="0 0 76 76" xmlns="http://www.w3.org/2000/svg" class="home_screen_bot_icon">
                 <defs>
@@ -751,14 +811,15 @@
                         <stop offset="100%" stop-color="#D4AF37" stop-opacity="0"/>
                     </radialGradient>
                 </defs>
-                <path class="siri-1" d="M38 12 C51 12 64 25 64 38 C64 51 51 64 38 64 C25 64 12 51 12 38 C12 25 25 12 38 12 Z" fill="url(#bgrad1)"></path>
-                <path class="siri-2" d="M38 15 C47 15 60 28 60 38 C60 47 47 60 38 60 C29 60 16 47 16 38 C16 28 29 15 38 15 Z" fill="url(#bgrad2)"></path>
-                <path class="siri-3" d="M38 19 C44 19 57 32 57 38 C57 44 44 57 38 57 C32 57 19 44 19 38 C19 32 32 19 38 19 Z" fill="url(#bgrad3)"></path>
-                <path class="siri-4" d="M38 22 C41 22 54 35 54 38 C54 41 41 54 38 54 C35 54 22 41 22 38 C22 35 35 22 38 22 Z" fill="url(#bgrad1)"></path>
-                <path class="siri-5" d="M38 25 C44 25 50 28 50 38 C50 47 44 50 38 50 C32 50 26 47 26 38 C26 28 32 25 38 25 Z" fill="url(#bgrad2)"></path>
-                <path class="siri-6" d="M38 28 C41 28 47 31 47 38 C47 45 41 47 38 47 C35 47 29 45 29 38 C29 31 35 28 38 28 Z" fill="url(#bgrad3)"></path>
-                <path class="siri-7" d="M38 31 C39 31 44 33 44 38 C44 42 39 44 38 44 C37 44 32 42 32 38 C32 33 37 31 38 31 Z" fill="url(#bgrad1)"></path>
-                <path class="siri-8" d="M38 35 C39 35 41 35 41 38 C41 40 39 41 38 41 C37 41 35 40 35 38 C35 35 37 35 38 35 Z" fill="url(#bgrad2)"></path>
+                <circle cx="38" cy="38" r="35" fill="url(#orbBg)" stroke="url(#goldRim)" stroke-width="0.6" />
+                <path class="siri-1" d="M38 12 C51 12 64 25 64 38 C64 51 51 64 38 64 C25 64 12 51 12 38 C12 25 25 12 38 12 Z" fill="url(#bgrad1)" style="mix-blend-mode: screen;"></path>
+                <path class="siri-2" d="M38 15 C47 15 60 28 60 38 C60 47 47 60 38 60 C29 60 16 47 16 38 C16 28 29 15 38 15 Z" fill="url(#bgrad2)" style="mix-blend-mode: screen;"></path>
+                <path class="siri-3" d="M38 19 C44 19 57 32 57 38 C57 44 44 57 38 57 C32 57 19 44 19 38 C19 32 32 19 38 19 Z" fill="url(#bgrad3)" style="mix-blend-mode: screen;"></path>
+                <path class="siri-4" d="M38 22 C41 22 54 35 54 38 C54 41 41 54 38 54 C35 54 22 41 22 38 C22 35 35 22 38 22 Z" fill="url(#bgrad1)" style="mix-blend-mode: screen;"></path>
+                <path class="siri-5" d="M38 25 C44 25 50 28 50 38 C50 47 44 50 38 50 C32 50 26 47 26 38 C26 28 32 25 38 25 Z" fill="url(#bgrad2)" style="mix-blend-mode: screen;"></path>
+                <path class="siri-6" d="M38 28 C41 28 47 31 47 38 C47 45 41 47 38 47 C35 47 29 45 29 38 C29 31 35 28 38 28 Z" fill="url(#bgrad3)" style="mix-blend-mode: screen;"></path>
+                <path class="siri-7" d="M38 31 C39 31 44 33 44 38 C44 42 39 44 38 44 C37 44 32 42 32 38 C32 33 37 31 38 31 Z" fill="url(#bgrad1)" style="mix-blend-mode: screen;"></path>
+                <path class="siri-8" d="M38 35 C39 35 41 35 41 38 C41 40 39 41 38 41 C37 41 35 40 35 38 C35 35 37 35 38 35 Z" fill="url(#bgrad2)" style="mix-blend-mode: screen;"></path>
             </svg>
         </div>
     </div>
@@ -954,6 +1015,19 @@
             const visualizer = document.getElementById('usd-visualizer');
             const interimBox = document.getElementById('usd-interim-text');
             const voiceTrigger = document.getElementById('usd-voice-trigger-btn');
+            
+            // Core design class mutation hook for the glassy gold siri orb
+            const innerWrap = document.getElementById('usd-chat-inner-wrap');
+            if (innerWrap) {
+                innerWrap.classList.remove('usd-speaking', 'usd-listening', 'usd-thinking');
+                if (newState === 'speaking') {
+                    innerWrap.classList.add('usd-speaking');
+                } else if (newState === 'listening') {
+                    innerWrap.classList.add('usd-listening');
+                } else if (newState === 'thinking') {
+                    innerWrap.classList.add('usd-thinking');
+                }
+            }
 
             if (statusBox) {
                 if (newState === 'connecting' || newState === 'off') {
@@ -1063,7 +1137,7 @@
 
             if (
                 text.includes("consultation") || text.includes("consult") || text.includes("schedule") || text.includes("appointment") || text.includes("book") ||
-                text.includes("visit the clinic") || text.includes("कंसल्टेशन") || text.includes("अपॉइंटमेंट") || text.includes("કન્સલ્ટેશન") || text.includes("એપોઇન્ટમેન્ટ")
+                text.includes("visit the clinic") || text.includes("कंसल्टेशन") || text.includes("अपॉइंटमेंट") || text.includes("કન્સલ્ટેશન") || text.科学 અથવા "એપોઇન્ટમેન્ટ"
             ) return "[LINK_CONSULT]";
 
             if (
