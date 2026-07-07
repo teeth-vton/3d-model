@@ -770,36 +770,71 @@
             </div>
         </div>
         
-        <!-- FLOATING TRIGGER BUBBLE -->
+      <!-- FLOATING BUBBLE BUTTON -->
         <div id="usd-bubble" class="voice_chat_bot_icon_container" onclick="openChat(false)">
-            <svg viewBox="0 0 76 76" xmlns="http://www.w3.org/2000/svg" class="home_screen_bot_icon">
+            <!-- ⚡ Premium Glassy Siri Orb (Matched to your image) ⚡ -->
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="home_screen_bot_icon">
                 <defs>
-                    <radialGradient id="bgrad1" cx="50%" cy="50%" r="50%">
-                        <stop offset="0%" stop-color="#FFD700" stop-opacity="0.85"/>
-                        <stop offset="100%" stop-color="#B8860B" stop-opacity="0"/>
+                    <!-- Spherical base background highlight -->
+                    <radialGradient id="orbBgHome" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#111111" />
+                        <stop offset="65%" stop-color="#1b1b1b" />
+                        <stop offset="85%" stop-color="#101010" />
+                        <stop offset="100%" stop-color="#05050a" />
                     </radialGradient>
-                    <radialGradient id="bgrad2" cx="50%" cy="50%" r="50%">
-                        <stop offset="0%" stop-color="#D4AF37" stop-opacity="0.85"/>
-                        <stop offset="100%" stop-color="#8B6508" stop-opacity="0"/>
+                    
+                    <!-- Golden reflective bounding edge -->
+                    <linearGradient id="goldRimHome" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="rgba(212, 175, 55, 0.55)" />
+                        <stop offset="50%" stop-color="rgba(255, 248, 220, 0.75)" />
+                        <stop offset="100%" stop-color="rgba(170, 128, 60, 0.55)" />
+                    </linearGradient>
+
+                    <!-- Translucent inner ribbons -->
+                    <linearGradient id="ribbonGrad1Home" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="rgba(212, 175, 55, 0.65)" />
+                        <stop offset="100%" stop-color="rgba(170, 128, 60, 0.05)" />
+                    </linearGradient>
+                    
+                    <linearGradient id="ribbonGrad2Home" x1="100%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="rgba(251, 239, 172, 0.75)" />
+                        <stop offset="100%" stop-color="rgba(196, 157, 71, 0.05)" />
+                    </linearGradient>
+                    
+                    <!-- Pulsing center glow -->
+                    <radialGradient id="coreGlowHome" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
+                        <stop offset="25%" stop-color="#fbefac" stop-opacity="0.8" />
+                        <stop offset="60%" stop-color="#D4AF37" stop-opacity="0.15" />
+                        <stop offset="100%" stop-color="#D4AF37" stop-opacity="0" />
                     </radialGradient>
-                    <radialGradient id="bgrad3" cx="50%" cy="50%" r="50%">
-                        <stop offset="0%" stop-color="#FFF8DC" stop-opacity="0.85"/>
-                        <stop offset="100%" stop-color="#D4AF37" stop-opacity="0"/>
-                    </radialGradient>
+
+                    <!-- Specular 3D glass reflection -->
+                    <linearGradient id="reflectGradHome" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.12" />
+                        <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+                    </linearGradient>
                 </defs>
-                <circle cx="38" cy="38" r="35" fill="url(#orbBg)" stroke="url(#goldRim)" stroke-width="0.6" />
-                <path class="siri-1" d="M38 12 C51 12 64 25 64 38 C64 51 51 64 38 64 C25 64 12 51 12 38 C12 25 25 12 38 12 Z" fill="url(#bgrad1)" style="mix-blend-mode: screen;"></path>
-                <path class="siri-2" d="M38 15 C47 15 60 28 60 38 C60 47 47 60 38 60 C29 60 16 47 16 38 C16 28 29 15 38 15 Z" fill="url(#bgrad2)" style="mix-blend-mode: screen;"></path>
-                <path class="siri-3" d="M38 19 C44 19 57 32 57 38 C57 44 44 57 38 57 C32 57 19 44 19 38 C19 32 32 19 38 19 Z" fill="url(#bgrad3)" style="mix-blend-mode: screen;"></path>
-                <path class="siri-4" d="M38 22 C41 22 54 35 54 38 C54 41 41 54 38 54 C35 54 22 41 22 38 C22 35 35 22 38 22 Z" fill="url(#bgrad1)" style="mix-blend-mode: screen;"></path>
-                <path class="siri-5" d="M38 25 C44 25 50 28 50 38 C50 47 44 50 38 50 C32 50 26 47 26 38 C26 28 32 25 38 25 Z" fill="url(#bgrad2)"></path>
-                <path class="siri-6" d="M38 28 C41 28 47 31 47 38 C47 45 41 47 38 47 C35 47 29 45 29 38 C29 31 35 28 38 28 Z" fill="url(#bgrad3)" style="mix-blend-mode: screen;"></path>
-                <path class="siri-7" d="M38 31 C39 31 44 33 44 38 C44 42 39 44 38 44 C37 44 32 42 32 38 C32 33 37 31 38 31 Z" fill="url(#bgrad1)" style="mix-blend-mode: screen;"></path>
-                <path class="siri-8" d="M38 35 C39 35 41 35 41 38 C41 40 39 41 38 41 C37 41 35 40 35 38 C35 35 37 35 38 35 Z" fill="url(#bgrad2)" style="mix-blend-mode: screen;"></path>
+
+                <!-- Glass sphere bounding structure -->
+                <circle cx="50" cy="50" r="47" fill="url(#orbBgHome)" stroke="url(#goldRimHome)" stroke-width="0.8" />
+
+                <!-- Concentric morphing organic shapes inside -->
+                <g id="fluid-group-home">
+                    <path class="fluid-ribbon r1" d="M18 40 C20 22, 60 12, 80 25 C65 37, 37 37, 18 40 Z" fill="url(#ribbonGrad1Home)" style="mix-blend-mode: screen;" />
+                    <path class="fluid-ribbon r2" d="M15 57 C12 40, 42 45, 57 65 C37 70, 22 67, 15 57 Z" fill="url(#ribbonGrad2Home)" style="mix-blend-mode: screen;" />
+                    <path class="fluid-ribbon r3" d="M35 80 C55 65, 85 55, 82 37 C72 57, 52 72, 35 80 Z" fill="rgba(255,255,255,0.35)" style="mix-blend-mode: screen;" />
+                    <path class="fluid-ribbon r4" d="M30 20 C50 30, 70 50, 55 75 C45 60, 35 40, 30 20 Z" fill="url(#ribbonGrad1Home)" style="mix-blend-mode: screen;" />
+                </g>
+
+                <!-- White Hot Center Core Glow -->
+                <circle class="orb-core" cx="50" cy="50" r="22" fill="url(#coreGlowHome)" style="mix-blend-mode: screen;" />
+
+                <!-- Specular 3D overlay (gives it that shiny Apple/Siri glass look) -->
+                <circle cx="50" cy="50" r="47" fill="url(#reflectGradHome)" pointer-events="none" />
+                <path d="M20 11 A32 32 0 0 1 80 11 A37 37 0 0 0 20 11 Z" fill="rgba(255,255,255,0.06)" pointer-events="none" />
             </svg>
         </div>
-    </div>
-
     <script>
         /**
          * ============================================================================
