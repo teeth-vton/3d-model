@@ -38,15 +38,16 @@
             align-items: flex-end;
         }
 
-        /* Set strictly to 344px width as seen in Figma sizing properties */
+        /* Desktop Container Sizing */
         .voice_chat_bot_container {
             width: 344px;
             height: 520px;
             background-color: #000000;
-            box-shadow: 0px 0px 16.7px 0px rgba(255, 255, 255, 0.25);
-            border-radius: 14px;
+            box-shadow: 0px 0px 25px 0px rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            border-radius: 16px;
             position: absolute;
-            bottom: 0;
+            bottom: 90px; /* Sits cleanly above the bubble */
             right: 0;
             opacity: 0;
             visibility: hidden;
@@ -120,7 +121,7 @@
             letter-spacing: 1.5px;
             font-family: var(--font-Glida-Display);
             font-weight: 600;
-            color: #D4AF37; /* Figma Gold text theme */
+            color: #D4AF37; 
         }
 
         #usd-status-box {
@@ -167,7 +168,6 @@
             display: none;
         }
 
-        /* Premium Message Bubble with clean thin golden border */
         .bot_message {
             position: relative;
             background-color: #080808;
@@ -206,7 +206,6 @@
             border-top-left-radius: 2px;
         }
 
-        /* Clean plain text alignment for user messages as in design */
         .user_message {
             align-self: flex-end;
             text-align: right;
@@ -367,48 +366,6 @@
 
         /**
          * ============================================================================
-         * TOOLTIP STYLES
-         * ============================================================================
-         */
-        #usd-tooltip {
-            background: #D4AF37;
-            color: #111;
-            padding: 10px 15px;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: bold;
-            margin-bottom: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            animation: bounce 2s infinite;
-            position: relative;
-            cursor: pointer;
-            display: block; 
-            transition: opacity 0.3s ease-in-out;
-            opacity: 1;
-            z-index: 1000;
-        }
-
-        #usd-tooltip::after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            right: 30px;
-            border-width: 8px 8px 0;
-            border-style: solid;
-            border-color: #D4AF37 transparent transparent transparent;
-        }
-
-        @keyframes bounce {
-            0%, 100% { 
-                transform: translateY(0); 
-            }
-            50% { 
-                transform: translateY(-5px); 
-            }
-        }
-
-        /**
-         * ============================================================================
          * RATING & DIALOG CONFIRM OVERLAYS
          * ============================================================================
          */
@@ -508,19 +465,19 @@
          * ============================================================================
          */
         @keyframes rippleSpeak1 {
-            0% { transform: scale(1) translate(0px, 0px); opacity: 0.8; }
-            50% { transform: scale(1.15) translate(0px, 0px); opacity: 0.45; }
-            100% { transform: scale(1) translate(0px, 0px); opacity: 0.8; }
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.15); opacity: 0.45; }
+            100% { transform: scale(1); opacity: 0.8; }
         }
         @keyframes rippleSpeak2 {
-            0% { transform: scale(1) translate(0px, 0px); opacity: 0.6; }
-            50% { transform: scale(1.3) translate(0px, 0px); opacity: 0.25; }
-            100% { transform: scale(1) translate(0px, 0px); opacity: 0.6; }
+            0% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.3); opacity: 0.25; }
+            100% { transform: scale(1); opacity: 0.6; }
         }
         @keyframes rippleSpeak3 {
-            0% { transform: scale(1) translate(0px, 0px); opacity: 0.4; }
-            50% { transform: scale(1.45) translate(0px, 0px); opacity: 0.1; }
-            100% { transform: scale(1) translate(0px, 0px); opacity: 0.4; }
+            0% { transform: scale(1); opacity: 0.4; }
+            50% { transform: scale(1.45); opacity: 0.1; }
+            100% { transform: scale(1); opacity: 0.4; }
         }
 
         .voice_icon_main svg .ripple-1,
@@ -530,7 +487,6 @@
             transition: transform 0.3s ease;
         }
 
-        /* Ambient subtle wave animations during active interaction or listening */
         .voice_icon_main.is-listening svg .ripple-1,
         .usd-speaking #usd-voice-trigger-btn svg .ripple-1 {
             animation: rippleSpeak1 1.2s infinite ease-in-out;
@@ -554,7 +510,6 @@
             transition: transform 0.4s ease-out;
         }
 
-        /* Continuous ambient morph animations */
         @keyframes rotateCW {
             0% { transform: rotate(0deg) scale(1); }
             50% { transform: rotate(180deg) scale(1.05); }
@@ -572,42 +527,75 @@
             50% { transform: scale(1.15); opacity: 1; }
         }
 
-        /* Default gently drifting state */
         .fluid-ribbon.r1 { animation: rotateCW 12s linear infinite; }
         .fluid-ribbon.r2 { animation: rotateCCW 16s linear infinite; }
         .fluid-ribbon.r3 { animation: rotateCW 14s ease-in-out infinite; }
         .fluid-ribbon.r4 { animation: rotateCCW 18s ease-in-out infinite; }
         .orb-core { animation: pulseGlow 4s ease-in-out infinite; transform-origin: 50px 50px; }
 
-        /* Dynamic SPEAKING activity speeds: morphs dynamically like a voice speaking */
         .usd-speaking .fluid-ribbon.r1 { animation: rotateCW 2.2s linear infinite !important; }
         .usd-speaking .fluid-ribbon.r2 { animation: rotateCCW 2.8s linear infinite !important; }
         .usd-speaking .fluid-ribbon.r3 { animation: rotateCW 2.5s ease-in-out infinite !important; }
         .usd-speaking .fluid-ribbon.r4 { animation: rotateCCW 3.2s ease-in-out infinite !important; }
         .usd-speaking .orb-core { animation: pulseGlow 1s ease-in-out infinite !important; }
 
-        /* Slow computing state: gentle wave computation */
         .usd-thinking .fluid-ribbon.r1 { animation: rotateCW 7s linear infinite !important; }
         .usd-thinking .fluid-ribbon.r2 { animation: rotateCCW 9s linear infinite !important; }
         .usd-thinking .fluid-ribbon.r3 { animation: rotateCW 8s ease-in-out infinite !important; }
         .usd-thinking .fluid-ribbon.r4 { animation: rotateCCW 10s ease-in-out infinite !important; }
         .usd-thinking .orb-core { animation: pulseGlow 1.8s ease-in-out infinite !important; }
 
-        /* Passive listening state */
         .usd-listening .fluid-ribbon.r1 { animation: rotateCW 5s linear infinite !important; }
         .usd-listening .fluid-ribbon.r2 { animation: rotateCCW 6.5s linear infinite !important; }
         .usd-listening .fluid-ribbon.r3 { animation: rotateCW 5.8s ease-in-out infinite !important; }
         .usd-listening .fluid-ribbon.r4 { animation: rotateCCW 7.2s ease-in-out infinite !important; }
         .usd-listening .orb-core { animation: pulseGlow 2.5s ease-in-out infinite !important; }
+
+        /**
+         * ============================================================================
+         * MOBILE RESPONSIVENESS & SCALING
+         * ============================================================================
+         */
+        @media (max-width: 480px) {
+            .voice_agent_main { 
+                bottom: 20px; 
+                right: 20px; 
+            }
+            .voice_chat_bot_container { 
+                width: calc(100vw - 40px); 
+                height: 420px; 
+                max-height: 80vh;
+                bottom: 75px; /* Stay just above bubble */
+            }
+            .chat_main_container { 
+                padding: 12px; 
+            }
+            .home_screen_bot_icon { 
+                width: 65px; 
+                height: 65px; 
+            }
+            .voice_chat_bot_icon_container { 
+                width: 65px; 
+                height: 65px; 
+            }
+            .chat_box_icon_inside { 
+                width: 75px; 
+                height: 75px; 
+            }
+            .chat_box_inside_bot_icon { 
+                width: 75px; 
+                height: 75px; 
+            }
+            .voice_icon_main {
+                width: 75px;
+                height: 75px;
+            }
+        }
     </style>
 </head>
 <body>
 
     <div id="usd-voice-widget" class="voice_agent_main">
-        <!-- TOOLTIP -->
-        <div id="usd-tooltip" onclick="openChat(false)">
-            Namaste! Tap here to talk about your new smile!
-        </div>
 
         <!-- MAIN CHAT CONTAINER -->
         <div id="usd-chat-container" class="voice_chat_bot_container">
@@ -639,7 +627,6 @@
                     <div class="chat_box_icon_inside">
                         <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="chat_box_inside_bot_icon" id="usd-glass-orb-svg">
                             <defs>
-                                <!-- Spherical base background highlight -->
                                 <radialGradient id="orbBg" cx="50%" cy="50%" r="50%">
                                     <stop offset="0%" stop-color="#111111" />
                                     <stop offset="65%" stop-color="#1b1b1b" />
@@ -647,14 +634,12 @@
                                     <stop offset="100%" stop-color="#05050a" />
                                 </radialGradient>
                                 
-                                <!-- Golden reflective bounding gold edge -->
                                 <linearGradient id="goldRim" x1="0%" y1="0%" x2="100%" y2="100%">
                                     <stop offset="0%" stop-color="rgba(212, 175, 55, 0.55)" />
                                     <stop offset="50%" stop-color="rgba(255, 248, 220, 0.75)" />
                                     <stop offset="100%" stop-color="rgba(170, 128, 60, 0.55)" />
                                 </linearGradient>
 
-                                <!-- Translucent inner ribbons matching image layers -->
                                 <linearGradient id="ribbonGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
                                     <stop offset="0%" stop-color="rgba(212, 175, 55, 0.65)" />
                                     <stop offset="100%" stop-color="rgba(170, 128, 60, 0.05)" />
@@ -672,35 +657,22 @@
                                     <stop offset="100%" stop-color="#D4AF37" stop-opacity="0" />
                                 </radialGradient>
 
-                                <!-- Specular reflection path gradient -->
                                 <linearGradient id="reflectGrad" x1="0%" y1="0%" x2="0%" y2="100%">
                                     <stop offset="0%" stop-color="#ffffff" stop-opacity="0.12" />
                                     <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
                                 </linearGradient>
                             </defs>
 
-                            <!-- Glass sphere bounding structure -->
                             <circle cx="50" cy="50" r="47" fill="url(#orbBg)" stroke="url(#goldRim)" stroke-width="0.8" />
 
-                            <!-- Concentric morphing organic shapes inside -->
                             <g id="fluid-group">
-                                <!-- Amber Ribbon 1 (Top loop) -->
                                 <path class="fluid-ribbon r1" d="M18 40 C20 22, 60 12, 80 25 C65 37, 37 37, 18 40 Z" fill="url(#ribbonGrad1)" style="mix-blend-mode: screen;" />
-                                
-                                <!-- Amber Ribbon 2 (Left loop) -->
                                 <path class="fluid-ribbon r2" d="M15 57 C12 40, 42 45, 57 65 C37 70, 22 67, 15 57 Z" fill="url(#ribbonGrad2)" style="mix-blend-mode: screen;" />
-
-                                <!-- Silver Ribbon 3 (Crossing overlay) -->
                                 <path class="fluid-ribbon r3" d="M35 80 C55 65, 85 55, 82 37 C72 57, 52 72, 35 80 Z" fill="rgba(255,255,255,0.35)" style="mix-blend-mode: screen;" />
-
-                                <!-- Dense Ribbon 4 (Offset helper) -->
                                 <path class="fluid-ribbon r4" d="M30 20 C50 30, 70 50, 55 75 C45 60, 35 40, 30 20 Z" fill="url(#ribbonGrad1)" style="mix-blend-mode: screen;" />
                             </g>
 
-                            <!-- White Hot Center Core Glow -->
                             <circle class="orb-core" cx="50" cy="50" r="22" fill="url(#coreGlow)" style="mix-blend-mode: screen;" />
-
-                            <!-- Specular reflection overlay -->
                             <circle cx="50" cy="50" r="47" fill="url(#reflectGrad)" pointer-events="none" />
                             <path d="M20 11 A32 32 0 0 1 80 11 A37 37 0 0 0 20 11 Z" fill="rgba(255,255,255,0.06)" pointer-events="none" />
                         </svg>
@@ -715,19 +687,17 @@
                 
                 <!-- CONTROLS FOOTER (VOICE MODE ACTIVE) -->
                 <div class="chat_icon_and_voice_and_close_icon_container_main" id="usd-voice-controls-footer">
-                    <!-- Switch to Text Mode Icon (Exact structural replica of attached message graphic) -->
+                    <!-- Switch to Text Mode Icon -->
                     <div class="chat_icon_main" onclick="toggleChatMode()" title="Switch to Text Mode">
                         <svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:100%; height:100%;">
-                            <!-- Rounded square bubble matching the second attachment -->
                             <rect x="3" y="3" width="18" height="14" rx="3" ry="3" fill="none" stroke="#FFFFFF" stroke-width="2"></rect>
                             <path d="M7 17l-4 4v-4" fill="none" stroke="#FFFFFF" stroke-width="2"></path>
-                            <!-- Lines representing message rows inside the bubble icon -->
                             <line x1="7" y1="7" x2="17" y2="7" stroke="#FFFFFF" stroke-width="2"></line>
                             <line x1="7" y1="11" x2="13" y2="11" stroke="#FFFFFF" stroke-width="2"></line>
                         </svg>
                     </div>
 
-                    <!-- Concentric Golden Mic Button (Exact visual clone of attached microphone spec) -->
+                    <!-- ⚡ NEW CLEAN & CENTERED PREMIUM MIC ICON ⚡ -->
                     <div class="voice_icon_main is-listening" id="usd-voice-trigger-btn">
                         <svg viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg" class="voice_animation_icon">
                             <defs>
@@ -737,31 +707,29 @@
                                     <stop offset="70%" stop-color="#aa803c" />
                                     <stop offset="100%" stop-color="#be9644" />
                                 </linearGradient>
+                                <filter id="micShadow" x="-20%" y="-20%" width="140%" height="140%">
+                                    <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.5"/>
+                                </filter>
                             </defs>
-                            <!-- Thin outer gold rays/concentric outlines matching first attachment -->
+                            <!-- Ripples aligned to cx=45 cy=45 -->
                             <circle cx="45" cy="45" r="41" fill="none" stroke="rgba(212, 175, 55, 0.25)" stroke-width="1" class="ripple-3" />
                             <circle cx="45" cy="45" r="33" fill="none" stroke="rgba(212, 175, 55, 0.45)" stroke-width="1.2" class="ripple-2" />
                             <circle cx="45" cy="45" r="25" fill="none" stroke="rgba(212, 175, 55, 0.70)" stroke-width="1.5" class="ripple-1" />
                             
-                            <!-- Solid high-end glossy radial gold circle -->
-                            <circle cx="45" cy="45" r="18" fill="url(#goldGrad)" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.4))" />
+                            <!-- Gold Button Base -->
+                            <circle cx="45" cy="45" r="20" fill="url(#goldGrad)" filter="url(#micShadow)" />
                             
-                            <!-- Central microphone design containing stars/sparkles -->
-                            <g transform="translate(36.5, 36.5) scale(0.7)">
-                                <rect x="5" y="2" width="8" height="12" rx="4" fill="none" stroke="#111111" stroke-width="1.6" />
-                                <path d="M2 8 C2 12.5, 16 12.5, 16 8" fill="none" stroke="#111111" stroke-width="1.6" stroke-linecap="round" />
-                                <line x1="9" y1="13.5" x2="9" y2="17" stroke="#111111" stroke-width="1.6" stroke-linecap="round" />
-                                <line x1="6" y1="17" x2="12" y2="17" stroke="#111111" stroke-width="1.6" stroke-linecap="round" />
-                                
-                                <!-- Sparkle Diamond 1 -->
-                                <path d="M 10.5 4.5 Q 10.5 6.5 12.5 6.5 Q 10.5 6.5 10.5 8.5 Q 10.5 6.5 8.5 6.5 Q 10.5 6.5 10.5 4.5 Z" fill="#111111" transform="scale(0.8) translate(3, -1)" />
-                                <!-- Sparkle Diamond 2 -->
-                                <path d="M 6.5 8 Q 6.5 9.5 8 9.5 Q 6.5 9.5 6.5 11 Q 6.5 9.5 5 9.5 Q 6.5 9.5 6.5 8 Z" fill="#111111" transform="scale(0.6) translate(1, 3)" />
+                            <!-- Premium Centered Mic Icon -->
+                            <g transform="translate(37, 33) scale(0.65)" fill="none" stroke="#111111" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="7" y="2" width="10" height="15" rx="5" fill="#111111" stroke="none" />
+                                <path d="M2 13 v3 a10 10 0 0 0 20 0 v-3" />
+                                <line x1="12" y1="26" x2="12" y2="32" />
+                                <line x1="6" y1="32" x2="18" y2="32" />
                             </g>
                         </svg>
                     </div>
 
-                    <!-- Close Action Icon (Exact match of attached white minimalist cross graphic) -->
+                    <!-- Close Action Icon -->
                     <div class="close_icon_main" onclick="closeChatBtnClicked()" title="End Conversation">
                         <svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:100%; height:100%;">
                             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -968,20 +936,7 @@
          */
         window.addEventListener('scroll', () => {
             const currentScrollY = window.scrollY || document.documentElement.scrollTop;
-            const tooltip = document.getElementById('usd-tooltip');
             const bubble = document.getElementById('usd-bubble');
-            
-            if (currentScrollY > 30) {
-                if (tooltip) {
-                    tooltip.style.opacity = '0';
-                    tooltip.style.pointerEvents = 'none';
-                }
-            } else {
-                if (tooltip) {
-                    tooltip.style.opacity = '1';
-                    tooltip.style.pointerEvents = 'auto';
-                }
-            }
 
             let scrollSpeed = Math.abs(currentScrollY - lastScrollY);
             lastScrollY = currentScrollY;
@@ -1024,7 +979,6 @@
             const interimBox = document.getElementById('usd-interim-text');
             const voiceTrigger = document.getElementById('usd-voice-trigger-btn');
             
-            // Core design class mutation hook for the glassy gold siri orb
             const innerWrap = document.getElementById('usd-chat-inner-wrap');
             if (innerWrap) {
                 innerWrap.classList.remove('usd-speaking', 'usd-listening', 'usd-thinking');
@@ -1120,7 +1074,7 @@
 
         /**
          * ============================================================================
-         * LOCAL KEYWORD & TAG DETECTION (CORRECTED SYNTAX EXCLUDING BROKEN LITERALS)
+         * LOCAL KEYWORD & TAG DETECTION
          * ============================================================================
          */
         function detectLocalTagFromText(input = '') {
@@ -1240,7 +1194,6 @@
          */
         function updateLiveTranscript(text, tag = null, force = false) {
             // Live transcript popups disabled to prevent double rendering. 
-            // All assistant statements flow purely to usd-chat-log.
         }
 
         function hideLiveTranscript(delay = 0) {
@@ -1249,7 +1202,7 @@
 
         /**
          * ============================================================================
-         * MESSAGE ELEMENT GENERATOR (MAPPED TO TARGET UI CLASS SELECTORS)
+         * MESSAGE ELEMENT GENERATOR
          * ============================================================================
          */
         function createMessageDiv(sender, text) {
@@ -1641,12 +1594,14 @@
 
                         const speechProfile = getHumanSpeechProfile(
                             dataArray,
-                            timeDataArray, 
+                            timeDataArray,
                             streamCtx.sampleRate || 16000,
                             analyser.fftSize || 512
                         );
 
+                        // ⚡ FOREGROUND INTERRUPTION LOGIC ⚡
                         if (isSpeakingNow) {
+                            // Easily triggered by normal conversation, completely ignores thuds
                             const isForegroundVoice = speechProfile.isNearHumanSpeech && 
                                                       humanVolume > 15 && 
                                                       speechProfile.rms > 0.01 &&
@@ -1655,7 +1610,8 @@
                                                       
                             if (isForegroundVoice) {
                                 consecutiveInterruptFrames++;
-                                if (consecutiveInterruptFrames > 50) {
+                                // ⚡ FAST ~0.5 SEC INTERRUPTION ⚡
+                                if (consecutiveInterruptFrames > 25) {
                                     interruptBot();
                                     consecutiveInterruptFrames = 0;
                                 }
@@ -1667,6 +1623,8 @@
                         }
 
                         if (currentAgentState === 'listening' && isVoiceMode) {
+                            
+                            // Reset silence timer because user is making sound
                             if (humanVolume > 10 && window.resetSilenceTimer) {
                                 window.resetSilenceTimer();
                             }
@@ -2014,7 +1972,7 @@
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                     body: JSON.stringify({ 
                         access_key: "c1a373a7-407e-47f4-8403-be692c2f3eff", 
-                        subject: `New USD Voice Agent Rating: ${stars}/5 Stars`, 
+                        subject: `🌟 New USD Voice Agent Rating: ${stars}/5 Stars`, 
                         from_name: "Ultimate Smile Voice Agent", 
                         email: "noreply@ultimatesmiledesign.com",
                         message: `Transcript:\n\n${transcript}` 
@@ -2081,7 +2039,7 @@
         
         /**
          * ============================================================================
-         * LOCAL CHAT DOM INJECTOR (SUPPORTING PRESETS IN LAYOUTS)
+         * LOCAL CHAT DOM INJECTOR
          * ============================================================================
          */
         function logMessage(sender, text, tag = null) {
