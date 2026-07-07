@@ -23,7 +23,7 @@
 
         /**
          * ============================================================================
-         * USER INTERFACE LAYOUT & CLASSES (MATCHING TARGET DESIGN)
+         * USER INTERFACE LAYOUT & CLASSES
          * ============================================================================
          */
         .voice_agent_main {
@@ -117,6 +117,7 @@
             width: 100%;
             height: 100%;
             object-fit: contain;
+            border-radius: 50%;
         }
 
         .header_title {
@@ -384,7 +385,7 @@
 
         /**
          * ============================================================================
-         * TOOLTIP STYLES (PRESERVED FROM CORE CONFIG)
+         * TOOLTIP STYLES
          * ============================================================================
          */
         #usd-tooltip {
@@ -994,7 +995,7 @@
                 <!-- HEADER -->
                 <div class="voice_icon_title_and_close_icon_main">
                     <div class="header_voice_icon" id="usd-header-left" style="display: flex; align-items: center;">
-                        <img src="https://raw.githubusercontent.com/teeth-vton/sd-voice-backend/dab01d9f2e96be2fcda278af63db62dfef9e1559/Gemini_Generated_Image_67gd1767gd1767gd.png" alt="USD Assistant">
+                        <img src="https://raw.githubusercontent.com/teeth-vton/sd-voice-backend/dab01d9f2e96be2fcda278af63db62dfef9e1559/Gemini_Generated_Image_67gd1767gd1767gd.png" alt="USD Assistant" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg viewBox=\'0 0 24 24\' xmlns=\'http://www.w3.org/2000/svg\'><circle cx=\'12\' cy=\'12\' r=\'12\' fill=\'%23D4AF37\'/><path d=\'M12 4c-4.418 0-8 3.582-8 8s3.582 8 8 8 8-3.582 8-8-3.582-8-8-8zm0 13c-2.761 0-5-2.239-5-5s2.239-5 5-5 5 2.239 5 5-2.239 5-5 5z\' fill=\'%23111111\'/></svg>';">
                     </div>
                     <div class="header_title">
                         <div class="chat_bot_label">Ultimate Smile Design</div>
@@ -1046,7 +1047,7 @@
                 <div id="usd-chat-log" class="chat_main_container"></div>
                 
                 <!-- INTERIM MIC TEXT -->
-                <div id="usd-interim-text" style="color: #D4AF37;"></div>
+                <div id="usd-interim-text" style="color: #D4AF37; text-align: center; font-style: italic; font-size: 13px; font-weight: bold; min-height: 18px; margin-bottom: 5px;"></div>
                 
                 <!-- CONTROLS FOOTER (VOICE MODE ACTIVE) -->
                 <div class="chat_icon_and_voice_and_close_icon_container_main" id="usd-voice-controls-footer">
@@ -1084,7 +1085,7 @@
                 </div>
 
                 <!-- TEXT INPUT PANEL (TEXT MODE ACTIVE) -->
-                <div class="massge_input_main" id="usd-input-container">
+                <div class="massge_input_main" id="usd-input-container" style="display: none;">
                     <div class="input_box_and_icon_main">
                         <input type="text" id="usd-text-input" class="chat_input_box" placeholder="Type your message here..." onkeypress="handleKeyPress(event)">
                         <div class="send_button_icon" id="usd-send-btn" onclick="submitTextMessage()">
@@ -1284,22 +1285,30 @@
             const bubble = document.getElementById('usd-bubble');
             
             if (currentScrollY > 30) {
-                tooltip.style.opacity = '0';
-                tooltip.style.pointerEvents = 'none';
+                if (tooltip) {
+                    tooltip.style.opacity = '0';
+                    tooltip.style.pointerEvents = 'none';
+                }
             } else {
-                tooltip.style.opacity = '1';
-                tooltip.style.pointerEvents = 'auto';
+                if (tooltip) {
+                    tooltip.style.opacity = '1';
+                    tooltip.style.pointerEvents = 'auto';
+                }
             }
 
             let scrollSpeed = Math.abs(currentScrollY - lastScrollY);
             lastScrollY = currentScrollY;
 
             let dynamicPulseSize = Math.min(20 + (scrollSpeed * 1.5), 80);
-            bubble.style.setProperty('--pulse-max', `${dynamicPulseSize}px`);
+            if (bubble) {
+                bubble.style.setProperty('--pulse-max', `${dynamicPulseSize}px`);
+            }
 
             clearTimeout(scrollTimeout);
             scrollTimeout = setTimeout(() => {
-                bubble.style.setProperty('--pulse-max', '20px');
+                if (bubble) {
+                    bubble.style.setProperty('--pulse-max', '20px');
+                }
             }, 150);
         });
 
@@ -1996,7 +2005,7 @@
 
                         const speechProfile = getHumanSpeechProfile(
                             dataArray,
-                            timeDomainArray,
+                            timeDataArray, // FIXED: Corrected reference from timeDomainArray to timeDataArray
                             streamCtx.sampleRate || 16000,
                             analyser.fftSize || 512
                         );
@@ -2418,4 +2427,80 @@
         /**
          * ============================================================================
          * LINK REDIRECTION HANDLER
-         * ==========================================
+         * ============================================================================
+         */
+        async function handleLinkClick(tag) {
+            const linkInfo = usdLinks[tag];
+            if (!linkInfo) return;
+            
+            logMessage('bot', "Redirecting you now...");
+            chatHistory.push({ role: "model", parts: [{ text: "Redirecting you now..." }] });
+            if (chatHistory.length > 6) chatHistory = chatHistory.slice(-6);
+            saveHistory();
+
+            window.open(linkInfo.url, '_blank');
+            
+            updateState('listening');
+        }
+        
+        /**
+         * ============================================================================
+         * LOCAL CHAT DOM INJECTOR (SUPPORTING PRESETS IN LAYOUTS)
+         * ============================================================================
+         */
+        function logMessage(sender, text, tag = null) {
+            const log = document.getElementById('usd-chat-log');
+            const msgDiv = document.createElement('div');
+            
+            if (sender === 'user') {
+                msgDiv.className = 'user_message';
+            } else if (sender === 'bot') {
+                msgDiv.className = 'bot_message';
+            } else {
+                msgDiv.className = 'msg msg-system';
+            }
+            
+            const p = document.createElement('p');
+            p.className = 'usd-msg-text';
+            
+            if (sender === 'user') p.innerText = "You: " + text;
+            else if (sender === 'bot') p.innerText = "Assistant: " + text;
+            else p.innerText = text; 
+            
+            msgDiv.appendChild(p);
+
+            if (tag && usdLinks[tag]) {
+                const btn = document.createElement('button');
+                btn.className = 'usd-link-card';
+                btn.innerText = usdLinks[tag].label;
+                btn.onclick = () => handleLinkClick(tag);
+                msgDiv.appendChild(btn);
+            }
+
+            log.appendChild(msgDiv);
+            log.scrollTop = log.scrollHeight;
+
+            if (sender === 'bot') {
+                lastBotMessageDiv = msgDiv;
+            }
+
+            return msgDiv;
+        }
+
+        /**
+         * ============================================================================
+         * EXPLICIT GLOBAL PROPERTY BINDINGS (RESOLVES REFERENCEERRORS)
+         * ============================================================================
+         */
+        window.openChat = openChat;
+        window.closeChat = closeChat;
+        window.confirmEndChat = confirmEndChat;
+        window.toggleChatMode = toggleChatMode;
+        window.closeChatBtnClicked = closeChatBtnClicked;
+        window.submitTextMessage = submitTextMessage;
+        window.submitRating = submitRating;
+        window.handleKeyPress = handleKeyPress;
+        window.handleLinkClick = handleLinkClick;
+    </script>
+</body>
+</html>
