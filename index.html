@@ -1,4 +1,4 @@
-<!-- index.html -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1033,7 +1033,27 @@
                         );
 
                         if (isSpeakingNow) {
-                            // ⚡ INTERRUPTION DISABLED AS REQUESTED ⚡
+                            // ⚡ STRICTION ON INTERRUPTION: Requires significantly louder/nearer voice for solid 300ms ⚡
+                            // Because it takes 10 consecutive frames, brief background noises or single words won't interrupt her!
+                            if (speechProfile.isNearHumanSpeech && humanVolume > 35) { 
+                                consecutiveLoudFrames++;
+                                if (consecutiveLoudFrames >= 10) { 
+                                    consecutiveLoudFrames = 0;
+
+                                    clearTimeout(shortPauseTimer);
+                                    clearTimeout(longPauseTimer);
+                                    clearTimeout(maxRecordingTimer);
+                                    shortPauseTimer = null;
+                                    longPauseTimer = null;
+                                    maxRecordingTimer = null;
+
+                                    interruptBot();
+                                    updateState('listening');
+                                    isRecording = false;
+                                }
+                            } else {
+                                consecutiveLoudFrames = 0; 
+                            }
                             requestAnimationFrame(detectVoice);
                             return;
                         }
@@ -1078,7 +1098,7 @@
                                     }
                                 }, 600); 
 
-                                // ⚡ FAST TRANSITION: 1000ms to immediately switch to "Answering..." when you stop talking
+                                // ⚡ FAST TRANSITION: 800ms to immediately switch to "Answering..." when you stop talking
                                 longPauseTimer = setTimeout(() => {
                                     if (isRecording) {
                                         isRecording = false;
@@ -1088,7 +1108,7 @@
                                             socket.send(JSON.stringify({ type: 'process_final', history: chatHistory, isVoiceMode: isVoiceMode }));
                                         }
                                     }
-                                }, 1000); 
+                                }, 800); 
                             }
                         }
                         requestAnimationFrame(detectVoice);
@@ -1283,11 +1303,8 @@
 
             try {
                 let transcript = "No chat history recorded.";
-                
-                // ⚡ FIX: Scrape the ENTIRE visual chat log from the UI instead of the 6-message Gemini array ⚡
-                const allMessages = document.querySelectorAll('#usd-chat-log .usd-msg-text');
-                if (allMessages.length > 0) {
-                    transcript = Array.from(allMessages).map(msg => msg.innerText).join('\n\n');
+                if (chatHistory && chatHistory.length > 0) {
+                    transcript = chatHistory.map(turn => `${turn.role === 'user' ? 'User' : 'Agent'}: ${turn.parts[0].text}`).join('\n\n');
                 }
 
                 await fetch('https://api.web3forms.com/submit', {
