@@ -1033,27 +1033,7 @@
                         );
 
                         if (isSpeakingNow) {
-                            // ⚡ STRICTION ON INTERRUPTION: Requires significantly louder/nearer voice for solid 300ms ⚡
-                            // Because it takes 10 consecutive frames, brief background noises or single words won't interrupt her!
-                            if (speechProfile.isNearHumanSpeech && humanVolume > 35) { 
-                                consecutiveLoudFrames++;
-                                if (consecutiveLoudFrames >= 10) { 
-                                    consecutiveLoudFrames = 0;
-
-                                    clearTimeout(shortPauseTimer);
-                                    clearTimeout(longPauseTimer);
-                                    clearTimeout(maxRecordingTimer);
-                                    shortPauseTimer = null;
-                                    longPauseTimer = null;
-                                    maxRecordingTimer = null;
-
-                                    interruptBot();
-                                    updateState('listening');
-                                    isRecording = false;
-                                }
-                            } else {
-                                consecutiveLoudFrames = 0; 
-                            }
+                            // ⚡ INTERRUPTION DISABLED ⚡
                             requestAnimationFrame(detectVoice);
                             return;
                         }
