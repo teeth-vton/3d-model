@@ -425,7 +425,7 @@
             recognition = new webkitSpeechRecognition();
             recognition.continuous = true;
             recognition.interimResults = true;
-            recognition.lang = 'hi-IN'; // Better detection for Indian English/Hindi
+            recognition.lang = 'en-IN'; // Defaulting to English/Indian accent for better cross-compatibility
 
             recognition.onresult = (event) => {
                 let interimTranscript = '';
@@ -506,6 +506,25 @@
             return result.trim();
         }
 
+        // ⚡ FIXED THE 10 SECOND SILENCE BUG ⚡
+        window.silenceTimeout = null;
+        window.resetSilenceTimer = () => {
+            clearTimeout(window.silenceTimeout);
+            window.silenceTimeout = setTimeout(() => {
+                if (currentAgentState === 'listening' && isVoiceMode) {
+                    updateState('thinking');
+                    if (socket && socket.readyState === WebSocket.OPEN) {
+                        socket.send(JSON.stringify({
+                            type: 'text_input',
+                            text: "SYSTEM INSTRUCTION: The user has been silent for a while. Ask them politely: 'Are you still there? Please let me know if you have any questions.' Do not say anything else.",
+                            history: chatHistory,
+                            isVoiceMode: true
+                        }));
+                    }
+                }
+            }, 45000); // ⚡ Increased from 10 seconds to 45 seconds to stop annoying the user!
+        };
+
         function updateState(newState, statusText = null) {
             currentAgentState = newState;
             const statusBox = document.getElementById('usd-status-box');
@@ -532,6 +551,7 @@
 
             if (newState === 'listening' && isVoiceMode) {
                 isMicSoftwareMuted = false;
+                if (window.resetSilenceTimer) window.resetSilenceTimer();
                 if (interimBox) {
                     if (liveUserText) {
                         interimBox.innerText = "You: " + liveUserText;
@@ -543,11 +563,11 @@
                 }
             } else {
                 isMicSoftwareMuted = true;
+                clearTimeout(window.silenceTimeout);
             }
 
             if (newState === 'thinking') {
                 if (interimBox) {
-                    // ⚡ Freezes the live text to indicate processing ⚡
                     if (liveUserText) {
                         interimBox.innerText = "You: " + liveUserText + " ...";
                         interimBox.style.color = "#ffffff";
@@ -873,7 +893,6 @@
             
             interruptRestartHoldUntil = performance.now() + 180;
             
-            // ⚡ CLEAR LIVE TEXT ⚡
             liveUserText = "";
             if (recognition) { try { recognition.abort(); } catch(e) {} }
 
@@ -1101,6 +1120,11 @@
                         }
 
                         if (currentAgentState === 'listening' && isVoiceMode) {
+                            // ⚡ SENSITIVE SILENCE RESET: Even a quiet "hmm" resets the 45-second timer ⚡
+                            if (humanVolume > 3 && window.resetSilenceTimer) {
+                                window.resetSilenceTimer();
+                            }
+
                             const inRestartHold = performance.now() < interruptRestartHoldUntil;
 
                             const canStartRecording = inRestartHold
@@ -1175,7 +1199,6 @@
                         liveUserText = ""; 
                         if (recognition) { try { recognition.abort(); } catch(e) {} }
                         
-                        // ⚡ WIPES ANY STUCK TEXT ⚡
                         const interimBox = document.getElementById('usd-interim-text');
                         if (interimBox) interimBox.innerText = "";
                         
@@ -1187,7 +1210,6 @@
                             logMessage('user', cleanUserText);
                             addUserHistoryIfNew(cleanUserText);
                             
-                            // ⚡ THE MAGIC FIX: Instantly erases the live text because Sarvam finished! ⚡
                             liveUserText = "";
                             const interimBox = document.getElementById('usd-interim-text');
                             if (interimBox && interimBox.innerText.includes("You:")) {
@@ -1230,7 +1252,6 @@
                     else if (data.type === 'reply_complete') {
                         isReplyComplete = true; 
                         
-                        // ⚡ CLEAR ALL INTERIM TEXT SO IT IS PERFECTLY CLEAN FOR NEXT TURN ⚡
                         liveUserText = ""; 
                         const interimBox = document.getElementById('usd-interim-text');
                         if (interimBox) {
@@ -1415,7 +1436,7 @@
             }
         }
 
-       async function handleLinkClick(tag) {
+        async function handleLinkClick(tag) {
             const linkInfo = usdLinks[tag];
             if (!linkInfo) return;
             
@@ -1425,22 +1446,29 @@
             saveHistory();
 
             window.open(linkInfo.url, '_blank');
-            
             updateState('listening');
         }
         
         function logMessage(sender, text, tag = null) {
             const log = document.getElementById('usd-chat-log');
             const msgDiv = document.createElement('div');
-            msgDiv.className = `msg msg-${sender}`;
             
-            const span = document.createElement('span');
-            span.className = 'usd-msg-text';
-            if (sender === 'user') span.innerText = "You: " + text;
-            else if (sender === 'bot') span.innerText = "Assistant: " + text;
-            else span.innerText = text; 
+            if (sender === 'user') {
+                msgDiv.className = 'user_message';
+            } else if (sender === 'bot') {
+                msgDiv.className = 'bot_message';
+            } else {
+                msgDiv.className = 'msg msg-system';
+            }
             
-            msgDiv.appendChild(span);
+            const p = document.createElement('p');
+            p.className = 'usd-msg-text';
+            
+            if (sender === 'user') p.innerText = text;
+            else if (sender === 'bot') p.innerText = text;
+            else p.innerText = text; 
+            
+            msgDiv.appendChild(p);
 
             if (tag && usdLinks[tag]) {
                 const btn = document.createElement('button');
@@ -1459,6 +1487,16 @@
 
             return msgDiv;
         }
+
+        window.openChat = openChat;
+        window.closeChat = closeChat;
+        window.confirmEndChat = confirmEndChat;
+        window.toggleChatMode = toggleChatMode;
+        window.closeChatBtnClicked = closeChatBtnClicked;
+        window.submitTextMessage = submitTextMessage;
+        window.submitRating = submitRating;
+        window.handleKeyPress = handleKeyPress;
+        window.handleLinkClick = handleLinkClick;
     </script>
 </body>
 </html>
